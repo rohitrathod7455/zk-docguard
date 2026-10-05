@@ -32,7 +32,27 @@
 
 ## Phase 1 — Smart Contracts
 
-**Status:** 🔲 Not started
+**Status:** ✅ Complete
+
+**What was done:**
+
+- Implemented `IssuerRegistry`, `DocumentRegistry`, and `RevocationRegistry` with custom errors, events, and NatSpec documentation.
+- Implemented OpenZeppelin v5 AccessControl, Pausable, and MerkleProof for batch issuance.
+- Implemented key rotation with configurable grace window (default 7 days) and 32-slot ring buffer for SMT roots.
+- 68 test cases across 4 test suites passing with **98.71%** line coverage (target ≥ 95%).
+- Slither 0.11.6 static analysis passed with 0 high and 0 medium findings (accepted findings documented in `DECISIONS.md`).
+- Solhint passed with 0 errors and 0 warnings.
+- Gas reporting configured and real measurements captured in `packages/contracts/gas-report.txt`.
+- ABIs and deployment addresses exported to `@zk-docguard/core`.
+- Deployment and verification scripts created (`deploy.ts`, `verify-scan.ts`, `export-artifacts.ts`) and verified on Hardhat network (`deployments/hardhat.json`).
+
+**What is deferred:**
+
+- Live broadcast to Polygon Amoy (chainId 80002) and Sepolia (chainId 11155111) is ready via `pnpm deploy:amoy` / `pnpm deploy:sepolia` when funded deployer private key is supplied in `.env`.
+
+**Known issues:**
+
+- None
 
 ---
 

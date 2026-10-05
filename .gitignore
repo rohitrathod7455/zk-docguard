@@ -27,6 +27,7 @@ Thumbs.db
 
 # Testing
 coverage/
+coverage.json
 test-results/
 
 # Turbo

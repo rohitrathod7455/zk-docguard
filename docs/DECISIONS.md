@@ -79,3 +79,59 @@
 **Consequence:** Dev machine runs Node 22 which is a superset of Node 20 features. CI uses Node 20 to validate compatibility.
 
 ---
+
+## D-006: Custom Errors and NatSpec in Contracts
+
+**Context:** Smart contracts need clear error reporting with low gas consumption and comprehensive documentation.
+
+**Options:**
+
+1. Traditional `require(condition, "error message")` strings
+2. Custom errors with typed parameters (`revert MyError(param)`)
+
+**Choice:** Custom errors for all revert conditions combined with strict NatSpec comments.
+
+**Consequence:** Significantly reduced deployment and execution bytecode size, gas savings (~20-50 gas per revert), and typed error handling in client libraries.
+
+---
+
+## D-007: Batch Issuance Merkle Scheme
+
+**Context:** Institutions issuing thousands of credentials need an inexpensive on-chain anchor without writing individual storage slots per credential.
+
+**Options:**
+
+1. Individual on-chain registrations (147k gas per document)
+2. Standard binary Merkle tree with sorted pairs using OpenZeppelin's `MerkleProof` library
+
+**Choice:** OpenZeppelin `MerkleProof` sorted pair tree with a single `registerBatch(batchRoot, count, manifestCid)` transaction (~145k gas for unlimited documents).
+
+**Consequence:** Batch anchoring cost is constant O(1) gas on-chain regardless of batch size. Individual documents verify in O(log N) through `verifyInBatch`.
+
+---
+
+## D-008: Revocation Ring Buffer Size
+
+**Context:** Verifiers need to check non-membership proofs against an SMT root that may have been updated between proof generation and on-chain verification.
+
+**Options:**
+
+1. Only the single latest root valid (brittle to race conditions when other credentials are revoked)
+2. Unbounded root history array (growing storage, expensive lookup)
+3. Fixed-size ring buffer of recent roots (32 elements)
+
+**Choice:** 32-element ring buffer (`ROOT_HISTORY_SIZE = 32`).
+
+**Consequence:** Proofs referencing roots from the last 32 epochs remain valid, providing a reliable tolerance window for concurrent revocations while bounding storage and iteration gas (~64k gas per root update).
+
+---
+
+## D-009: Slither Static Analysis Findings Acceptance
+
+**Context:** Slither security analysis identified timestamp usage and internal OpenZeppelin dependencies.
+
+**Findings & Rationale:**
+
+1. `block.timestamp` in expiry comparisons and key grace periods: Accepted because block timestamps cannot be manipulated by miners beyond a few seconds (EVM post-Merge has fixed 12s slots). Expiry and grace windows operate on orders of days or years.
+2. `assembly` in OpenZeppelin `Hashes.sol`: Accepted as standard audited OpenZeppelin library code.
+3. `naming-convention`: Solhint requires `UPPER_SNAKE_CASE` for immutable variables (`ISSUER_REGISTRY`), while Slither flags non-mixedCase. The Solhint standard was maintained.
