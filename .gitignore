@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.next/
+out/
+artifacts/
+cache/
+typechain-types/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+test-results/
+
+# Turbo
+.turbo/
+
+# Hardhat
+cache_hardhat/
+gas-report.txt
+
+# ZK artifacts (large binaries)
+packages/circuits/build/*.ptau
+packages/circuits/build/*.zkey
+packages/circuits/build/*.wasm
+packages/circuits/build/*.r1cs
+# Keep verification keys
+!packages/circuits/build/verification_key.json
+
+# Logs
+*.log
+pnpm-debug.log*
+
+# Secrets
+*.pem
+*.key

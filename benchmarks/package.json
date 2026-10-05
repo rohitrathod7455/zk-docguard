@@ -1,0 +1,15 @@
+{
+  "name": "@zk-docguard/benchmarks",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"No build for benchmarks\"",
+    "test": "echo \"Benchmarks — Phase 10\"",
+    "lint": "echo \"No lint for benchmarks yet\"",
+    "typecheck": "echo \"No typecheck for benchmarks yet\"",
+    "clean": "rimraf results"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1"
+  }
+}

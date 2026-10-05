@@ -1,0 +1,15 @@
+{
+  "name": "@zk-docguard/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"No build for e2e\"",
+    "test": "echo \"E2E tests — Phase 6+\"",
+    "lint": "echo \"No lint for e2e yet\"",
+    "typecheck": "echo \"No typecheck for e2e yet\"",
+    "clean": "rimraf test-results"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1"
+  }
+}

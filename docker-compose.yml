@@ -1,0 +1,62 @@
+# ZK-DocGuard — Development Services
+# Usage: docker compose up -d
+# Brings up PostgreSQL 16, IPFS (Kubo), and a Hardhat JSON-RPC node.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: zkdg-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zkdocguard
+      POSTGRES_PASSWORD: zkdocguard
+      POSTGRES_DB: zkdocguard
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U zkdocguard']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ipfs:
+    image: ipfs/kubo:v0.32.1
+    container_name: zkdg-ipfs
+    restart: unless-stopped
+    ports:
+      - '4001:4001' # Swarm
+      - '5001:5001' # API
+      - '8080:8080' # Gateway
+    volumes:
+      - ipfsdata:/data/ipfs
+    environment:
+      - IPFS_PROFILE=server
+    healthcheck:
+      test: ['CMD-SHELL', 'ipfs id || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  hardhat:
+    image: node:20-alpine
+    container_name: zkdg-hardhat
+    restart: unless-stopped
+    working_dir: /app
+    command: >
+      sh -c "
+        npm install -g hardhat &&
+        npx hardhat node --hostname 0.0.0.0
+      "
+    ports:
+      - '8545:8545'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:8545 || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  pgdata:
+  ipfsdata:

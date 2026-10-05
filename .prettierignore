@@ -1,0 +1,10 @@
+dist
+node_modules
+.next
+coverage
+artifacts
+cache
+typechain-types
+*.sol
+pnpm-lock.yaml
+next-env.d.ts

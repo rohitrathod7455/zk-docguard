@@ -1,0 +1,26 @@
+{
+  "name": "@zk-docguard/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --port 3000",
+    "start": "next start",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf .next out coverage"
+  },
+  "dependencies": {
+    "next": "^15.0.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "typescript": "^5.6.3",
+    "eslint": "^9.15.0",
+    "eslint-config-next": "^15.0.4",
+    "rimraf": "^6.0.1"
+  }
+}
