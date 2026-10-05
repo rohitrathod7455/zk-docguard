@@ -58,7 +58,35 @@
 
 ## Phase 2 — Core Library
 
-**Status:** 🔲 Not started
+**Status:** ✅ Complete
+
+**What was done:**
+
+- Implemented RFC 8785 JSON Canonicalization Scheme (JCS) via `canonicalJson()`.
+- Implemented BN254 scalar field arithmetic, bounds validation, and 253-bit deterministic string/bytes-to-field element mapping (`MASK_253_BITS`), eliminating modular reduction bias.
+- Implemented Poseidon multi-input and 2-input hashing, leaf commitment computation, domain-separated `credentialId` derivation (`Poseidon(root, 1)`), and issuer key hash generation.
+- Implemented deterministic BabyJubJub EdDSA key derivation from Ethereum wallet `personal_sign` signatures (RFC 6979) via HKDF-SHA256.
+- Implemented BabyJubJub EdDSA-Poseidon credential signing and verification with complete tamper rejection.
+- Implemented depth-3, 8-leaf binary Poseidon Merkle commitment tree builder with Merkle audit proof generation and cryptographic path verification.
+- Implemented client-side AES-256-GCM encryption/decryption with WebCrypto APIs and packed envelope serialization.
+- Implemented ECIES key wrapping (X25519 ECDH + HKDF-SHA256 + AES-256-GCM) with verifier-scoped expiration timestamps.
+- Implemented gasless browser-based holder SSI identity (`did:key:z...`) with Base58btc codec and W3C DID document resolver.
+- Implemented `did:ethr` parser and extended issuer DID document generator supporting `ZkDocGuardBabyJubJubKey2026`.
+- Defined canonical JSON Schema for `UniversityDegree` with 8 pinned attribute slots, precomputed `DEGREE_SCHEMA_ID`, and typed slot encoder.
+- Implemented dynamic `SchemaRegistry` with validation against JSON schema definitions.
+- Implemented W3C Verifiable Credential builder (`issueUniversityDegreeCredential`) and verifier (`verifyUniversityDegreeCredential`) with full cryptographic and structural validation.
+- Implemented Sparse Merkle Tree (SMT) revocation helper wrapping `circomlibjs.newMemEmptyTrie()`, generating inclusion and non-membership exclusion witnesses with padded siblings for Circom Mode B non-revocation proofs.
+- Implemented viem smart contract client wrappers for `IssuerRegistry`, `DocumentRegistry`, and `RevocationRegistry` with high-level on-chain query helpers.
+- Test suite: **86 unit tests passing across 11 test suites** with **94.62% line coverage** and **97.36% function coverage** (exceeding the ≥ 90% requirement).
+- Format, lint, typecheck, build, and tests verified across the entire monorepo.
+
+**What is deferred:**
+
+- None
+
+**Known issues:**
+
+- None
 
 ---
 

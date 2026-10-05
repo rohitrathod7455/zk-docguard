@@ -5,7 +5,9 @@
     "rootDir": ".",
     "module": "commonjs",
     "moduleResolution": "node",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "noUncheckedIndexedAccess": false,
+    "noUnusedLocals": false
   },
   "include": ["./scripts", "./test", "./hardhat.config.ts", "./typechain-types"],
   "files": ["./hardhat.config.ts"]

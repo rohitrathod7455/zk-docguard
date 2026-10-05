@@ -30,6 +30,16 @@ export default [
     },
   },
   {
+    files: ["**/*.test.ts", "**/*.spec.ts", "**/test/**"],
+    rules: {
+      "@typescript-eslint/no-unused-expressions": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+    },
+  },
+  {
     ignores: [
       "dist/**",
       "node_modules/**",

@@ -135,3 +135,57 @@
 1. `block.timestamp` in expiry comparisons and key grace periods: Accepted because block timestamps cannot be manipulated by miners beyond a few seconds (EVM post-Merge has fixed 12s slots). Expiry and grace windows operate on orders of days or years.
 2. `assembly` in OpenZeppelin `Hashes.sol`: Accepted as standard audited OpenZeppelin library code.
 3. `naming-convention`: Solhint requires `UPPER_SNAKE_CASE` for immutable variables (`ISSUER_REGISTRY`), while Slither flags non-mixedCase. The Solhint standard was maintained.
+
+---
+
+## D-010: RFC 8785 JSON Canonicalization and 253-Bit Field Element Mapping
+
+**Context:** Verifiable credential attributes and schema definitions must be deterministically serialized and mapped to BN254 scalar field elements without risk of field overflow or modulo bias.
+
+**Alternatives:**
+1. Standard `JSON.stringify` (non-deterministic key ordering across engines).
+2. Big-endian 256-bit modulo $r$ reduction (introduces modular bias for values $\ge r$).
+3. Bitwise truncation to 253 bits ($2^{253} - 1 < r$).
+
+**Choice:** RFC 8785 JSON Canonicalization Scheme (JCS) combined with bitwise 253-bit truncation (`MASK_253_BITS = (1n << 253n) - 1n`).
+
+**Consequence:** Since $2^{253} - 1 = 14474011154664524427946373126085988481653670815232014093764570747886458421247 < r \approx 2.1888 \times 10^{77}$, any 253-bit digest strictly belongs to the field $\mathbb{F}_r$ without arithmetic modulo reduction bias, guaranteeing complete determinism across all platforms.
+
+---
+
+## D-011: Pinned 8-Slot University Degree Schema and Depth-3 Poseidon Binary Merkle Tree
+
+**Context:** The selective disclosure ZK circuit (Mode A) and credential verification system require fixed slot commitments for attributes.
+
+**Alternatives:**
+1. Dynamic-depth Merkle tree per credential.
+2. Pinned 8-slot depth-3 binary Poseidon Merkle tree.
+
+**Choice:** Pinned 8-slot depth-3 binary Poseidon Merkle tree (`CREDENTIAL_TREE_DEPTH = 3`, `CREDENTIAL_ATTRIBUTE_COUNT = 8`).
+
+**Slots:**
+- Slot 0: `holderCommitment` (`Poseidon(holderSecret)`)
+- Slot 1: `schemaId` (canonical hash of schema JSON)
+- Slot 2: `degreeCode` (1=B.Tech, 2=M.Tech, 3=B.Sc, 4=M.Sc, 5=Ph.D)
+- Slot 3: `programCode` (numeric code e.g. 101 for Computer Science)
+- Slot 4: `graduationYear` (e.g. 2026)
+- Slot 5: `cgpaX100` (scaled integer e.g. 874 for 8.74)
+- Slot 6: `studentIdHash` (253-bit field hash of institutional student ID)
+- Slot 7: `expiry` (UNIX timestamp or 0/far-future for permanent)
+
+**Consequence:** Merkle audit paths always consist of exactly 3 sibling field elements, perfectly matching the Groth16 circuit template constraints and minimizing circuit witness computation overhead.
+
+---
+
+## D-012: In-Memory Sparse Merkle Tree (SMT) with Padded Siblings for Mode B Non-Revocation
+
+**Context:** Phase 3 circuits require non-membership exclusion witnesses from a Sparse Merkle Tree for privacy-preserving revocation verification.
+
+**Alternatives:**
+1. Raw sparse arrays without circomlib compatibility.
+2. Wrapper over `circomlibjs.newMemEmptyTrie()` with zero-padded siblings to `nLevels`.
+
+**Choice:** Custom `SparseMerkleTree` wrapper managing circomlibjs trie instances, exposing typed `getMembershipProof` and `getNonMembershipProof` with configurable level padding.
+
+**Consequence:** The SMT non-membership witness format matches the circomlib `SMTVerifier` component (`oldKey`, `oldValue`, `isOld0`, `siblings[nLevels]`, `fnc = 1`), enabling drop-in integration with the Mode B circuit.
+
