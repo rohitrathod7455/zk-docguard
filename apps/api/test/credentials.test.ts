@@ -125,4 +125,18 @@ describe('API Credentials and Verify Routes (/v1/credentials, /v1/verify)', () =
     const body = JSON.parse(res.body);
     expect(body.status).toBe('Unknown');
   });
+
+  it('lists credential records with filtering in GET /v1/credentials', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: `/v1/credentials?issuerAddress=${issuerAddress}&status=Valid`,
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.body);
+    expect(body.total).toBeGreaterThanOrEqual(1);
+    expect(body.records[0].docHash).toBe(docHash);
+    expect(body.records[0].status).toBe('Valid');
+  });
 });
+

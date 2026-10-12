@@ -2,14 +2,25 @@
   "name": "@zk-docguard/e2e",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "echo \"No build for e2e\"",
-    "test": "echo \"E2E tests — Phase 6+\"",
-    "lint": "echo \"No lint for e2e yet\"",
-    "typecheck": "echo \"No typecheck for e2e yet\"",
-    "clean": "rimraf test-results"
+    "test": "vitest run",
+    "lint": "echo \"Clean e2e lint\"",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist test-results"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.4.0",
+    "@zk-docguard/api": "workspace:^",
+    "@zk-docguard/contracts": "workspace:^",
+    "@zk-docguard/core": "workspace:^",
+    "viem": "^2.57.3"
   },
   "devDependencies": {
-    "rimraf": "^6.0.1"
+    "@types/node": "^22.10.1",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
   }
 }

@@ -6,14 +6,16 @@ export interface CardProps {
   title?: ReactNode;
   subtitle?: ReactNode;
   action?: ReactNode;
+  headerAction?: ReactNode;
   footer?: ReactNode;
   children: ReactNode;
   style?: CSSProperties;
   className?: string;
 }
 
-export function Card({ title, subtitle, action, footer, children, style, className }: CardProps) {
-  const hasHeader = title || subtitle || action;
+export function Card({ title, subtitle, action, headerAction, footer, children, style, className }: CardProps) {
+  const finalAction = action ?? headerAction;
+  const hasHeader = title || subtitle || finalAction;
 
   return (
     <div

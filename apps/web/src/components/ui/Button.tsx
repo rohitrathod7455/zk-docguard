@@ -10,6 +10,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   isLoading?: boolean;
+  loading?: boolean;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
 }
@@ -21,6 +22,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variant = 'primary',
       size = 'md',
       isLoading = false,
+      loading = false,
       leftIcon,
       rightIcon,
       disabled,
@@ -29,6 +31,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
+    const finalLoading = isLoading || loading;
     const isSecondary = variant === 'secondary';
     const isOutline = variant === 'outline';
     const isDanger = variant === 'danger';
@@ -71,7 +74,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        disabled={disabled || isLoading}
+        disabled={disabled || finalLoading}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -86,7 +89,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           background,
           color,
           border,
-          cursor: disabled || isLoading ? 'not-allowed' : 'pointer',
+          cursor: disabled || finalLoading ? 'not-allowed' : 'pointer',
           opacity: disabled ? 0.6 : 1,
           transition: 'background var(--transition-fast), border-color var(--transition-fast), opacity var(--transition-fast)',
           whiteSpace: 'nowrap',
@@ -95,10 +98,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         }}
         {...props}
       >
-        {isLoading && <Loader2 size={16} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />}
-        {!isLoading && leftIcon}
+        {finalLoading && <Loader2 size={16} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />}
+        {!finalLoading && leftIcon}
         <span>{children}</span>
-        {!isLoading && rightIcon}
+        {!finalLoading && rightIcon}
       </button>
     );
   },

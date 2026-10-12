@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 
-export type ToastType = 'success' | 'error' | 'info';
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 export interface ToastMessage {
   id: string;
@@ -17,7 +17,9 @@ interface ToastContextValue {
     success: (title: string, description?: string) => void;
     error: (title: string, description?: string) => void;
     info: (title: string, description?: string) => void;
+    warning: (title: string, description?: string) => void;
   };
+  showToast: (type: ToastType, title: string, description?: string) => void;
 }
 
 const ToastContext = createContext<ToastContextValue>({
@@ -25,7 +27,9 @@ const ToastContext = createContext<ToastContextValue>({
     success: () => {},
     error: () => {},
     info: () => {},
+    warning: () => {},
   },
+  showToast: () => {},
 });
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -49,10 +53,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     success: (title: string, description?: string) => addToast('success', title, description),
     error: (title: string, description?: string) => addToast('error', title, description),
     info: (title: string, description?: string) => addToast('info', title, description),
+    warning: (title: string, description?: string) => addToast('warning', title, description),
   };
 
   return (
-    <ToastContext.Provider value={{ toast }}>
+    <ToastContext.Provider value={{ toast, showToast: addToast }}>
       {children}
       <div
         style={{

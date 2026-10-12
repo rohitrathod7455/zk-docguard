@@ -217,7 +217,62 @@
 
 ## Phase 6 — Issuer Console and Admin
 
-**Status:** 🔲 Not started
+**Status:** ✅ Complete
+
+**What was done:**
+
+- **Administrative Governance Console (`/admin`, `/admin/issuers`, `/admin/audit`):**
+  - Institutional applicant review table with status filtering (Pending, Active, Suspended, Revoked).
+  - Admin approval, suspension, and role verification flows.
+  - Immutable activity audit log tracking registration, approval, suspension, and anchor events.
+  - Dashboard metrics for pending reviews, active issuers, anchored credentials, and batch operations.
+- **Issuer Key Studio & DID Management (`/issuer/keys`, `apps/web/src/lib/keys.ts`):**
+  - Deterministic BabyJubJub EdDSA proving key derivation from connected wallet signature via HKDF-SHA256.
+  - Cryptographic Poseidon key hash computation (`Poseidon(pubKeyX, pubKeyY)`) matching EVM `IssuerRegistry`.
+  - DID publication and formatting (`did:ethr:<chainId>:<address>`) with W3C DID document resolver links.
+  - Key rotation studio supporting active key verification and 90-day grace period enforcement.
+- **Single Issuance Studio (`/issuer/issue`, `apps/web/src/lib/issuance.ts`):**
+  - 5-step progressive Stepper workflow:
+    1. Schema & Document: 8-slot `UniversityDegree` schema form with degree level, field of study, GPA (scaled x100), graduation date, and holder DID.
+    2. Document Attachment: Client-side document encryption using WebCrypto AES-256-GCM.
+    3. Cryptographic Sealing: Poseidon 8-leaf commitment Merkle tree calculation and BabyJubJub EdDSA signature.
+    4. On-Chain Anchoring: Contract client execution against `DocumentRegistry` recording `(docHash, credentialId, schemaId, cid, expiry)`.
+    5. Delivery & Export: W3C Verifiable Credential package generation, crisp Canvas QR code display, and `.json` credential export.
+- **Batch Issuance Engine (`/issuer/batch`, `apps/web/src/lib/sample-batch-data.ts`):**
+  - Batch CSV processing for graduating cohorts with built-in 50-student sample cohort generator.
+  - Per-row 8-slot schema validation, field scalar constraints, and holder DID resolution.
+  - Batch Merkle tree construction over document hashes and credential IDs.
+  - Single-transaction on-chain batch root anchoring (`anchorBatchRoot`).
+  - Batch issuance manifest and delivery zip/bundle export.
+- **Credentials Registry & Revocation Management (`/issuer/credentials`):**
+  - Paginated registry of issued credentials with real-time status pills (Valid, Revoked, Expired).
+  - Detail inspection drawer showing slot commitments, Merkle proofs, and IPFS multihashes.
+  - On-chain document revocation and SMT revocation leaf publishing with reason codes.
+- **API Enhancements (`apps/api`):**
+  - Implemented `GET /v1/credentials` with pagination, status filtering, and issuer scoping.
+  - Implemented `GET /v1/issuers` public listing with status querying.
+  - Added robust cascading cleanup in test suites ensuring isolated database states.
+- **End-to-End Integration Test Suite (`e2e/test/issuer-flow.test.ts`):**
+  - Verified all 6 Phase 6 criteria in automated tests:
+    1. Institutional application and admin approval workflow.
+    2. Single credential issuance with 8-slot Poseidon schema and BabyJubJub EdDSA signature.
+    3. On-chain `DocumentRegistry` verification showing anchored document hash and timestamp.
+    4. IPFS storage validation verifying uploaded payload is encrypted ciphertext (asserted not valid plaintext or PDF).
+    5. Credential revocation verification marking record `Revoked` and invalidating SMT non-membership witness (409 Conflict).
+    6. Batch issuance of 50 students with an anchored Merkle root and manifest generation.
+- **Verification & Builds:**
+  - 218 total unit, circuit, contract, integration, and E2E tests passing 100% across the monorepo.
+  - Clean TypeScript typecheck (`pnpm typecheck`) with 0 errors across 8 packages.
+  - Clean ESLint and Solhint (`pnpm lint`) with 0 errors.
+  - Next.js production build (`next build`) generating all 14 routes statically.
+
+**What is deferred:**
+
+- Holder wallet & in-browser ZK proof generation (Phase 7).
+
+**Known issues:**
+
+- None.
 
 ---
 

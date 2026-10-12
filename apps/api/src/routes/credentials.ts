@@ -124,4 +124,60 @@ export async function credentialRoutes(app: FastifyInstance): Promise<void> {
       });
     },
   );
+
+  // 3. List credentials with filtering
+  app.get(
+    '/v1/credentials',
+    {
+      schema: {
+        description: 'List credential records with optional filtering',
+        tags: ['Credentials'],
+        querystring: {
+          type: 'object',
+          properties: {
+            issuerAddress: { type: 'string' },
+            status: { type: 'string' },
+            limit: { type: 'integer' },
+            offset: { type: 'integer' },
+          },
+        },
+      },
+    },
+    async (
+      req: FastifyRequest<{
+        Querystring: {
+          issuerAddress?: string;
+          status?: string;
+          limit?: number;
+          offset?: number;
+        };
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const { issuerAddress, status, limit = 50, offset = 0 } = req.query;
+      const where: { issuerAddress?: string; status?: string } = {};
+      if (issuerAddress) where.issuerAddress = issuerAddress.toLowerCase();
+      if (status) where.status = status;
+
+      const [records, total] = await Promise.all([
+        prisma.credentialRecord.findMany({
+          where,
+          take: Math.min(Number(limit), 100),
+          skip: Number(offset),
+          orderBy: { issuedAt: 'desc' },
+          include: { issuer: true },
+        }),
+        prisma.credentialRecord.count({ where }),
+      ]);
+
+      return reply.send({
+        total,
+        records: records.map((r) => ({
+          ...r,
+          expiry: r.expiry.toString(),
+        })),
+      });
+    },
+  );
 }
+

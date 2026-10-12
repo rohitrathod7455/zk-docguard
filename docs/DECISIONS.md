@@ -285,6 +285,21 @@
 
 **Consequence:** The web interface presents an authoritative, government-grade and university-grade aesthetic, suitable for high-stakes credential verification and patent presentation.
 
+---
 
+## D-019: Client-Side AES-256-GCM Encryption with Base64 JSON Ingestion and Poseidon Merkle Batching
 
+**Context:** The Phase 6 issuance pipeline requires anchoring credentials on-chain while upholding strict privacy and zero document leakage. The plaintext degree document (e.g. PDF/JSON) must never reach the backend API unencrypted, and institutions issuing graduating cohorts (50+ students) require high-throughput batching without linear on-chain gas costs.
 
+**Alternatives:**
+1. Server-side document encryption and raw binary octet-stream upload endpoints.
+2. In-browser client-side WebCrypto AES-256-GCM encryption with base64 ciphertext packaging, JSON REST ingestion, and dual-mode single/batch Merkle anchoring.
+3. Plaintext storage with off-chain zero-knowledge proofs only.
+
+**Choice:** Choice 2 — Client-side WebCrypto AES-256-GCM encryption with base64 JSON payload ingestion:
+- **Client-Side Document Sealing:** AES-GCM-256 generates a random 256-bit symmetric key per credential. The document plaintext is encrypted in-browser before any network transmission. The returned IPFS payload is provably non-decryptable without the symmetric key (asserted in E2E tests).
+- **Fastify JSON Ingestion:** Ingestion uses JSON payloads (`{ ciphertext: base64, metadata: { algorithm: "AES-256-GCM", tagLength: 128 } }`), standardizing validation, schema typing, and avoiding raw multipart stream quirks.
+- **Poseidon 8-Leaf Commitment Merkle Tree:** Each credential calculates 8 field leaves and an 8-leaf depth-3 Poseidon Merkle tree.
+- **Batch Cohort Anchoring:** Graduating cohorts calculate a batch root over document hashes or credential IDs, enabling single-transaction on-chain anchoring of 50+ students with individual cryptographic inclusion verification.
+
+**Consequence:** End-to-end zero-knowledge compliance, absolute immunity to server-side document interception, and sub-100k gas batch anchoring on EVM chains.

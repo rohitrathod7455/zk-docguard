@@ -9,6 +9,7 @@ export interface ChipProps {
   label?: string;
   prefixLength?: number;
   suffixLength?: number;
+  truncateLength?: number;
   href?: string;
   isMono?: boolean;
 }
@@ -18,15 +19,19 @@ export function Chip({
   label,
   prefixLength = 6,
   suffixLength = 4,
+  truncateLength,
   href,
   isMono = true,
 }: ChipProps) {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
+  const finalPrefix = truncateLength ?? prefixLength;
+  const finalSuffix = truncateLength ? Math.min(truncateLength, 4) : suffixLength;
+
   const truncate = (str: string) => {
-    if (str.length <= prefixLength + suffixLength + 3) return str;
-    return `${str.slice(0, prefixLength)}...${str.slice(-suffixLength)}`;
+    if (str.length <= finalPrefix + finalSuffix + 3) return str;
+    return `${str.slice(0, finalPrefix)}...${str.slice(-finalSuffix)}`;
   };
 
   const handleCopy = async (e: React.MouseEvent) => {

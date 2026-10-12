@@ -94,7 +94,32 @@ export async function issuerRoutes(app: FastifyInstance): Promise<void> {
     },
   );
 
-  // 3. Admin: list issuers (with optional status filter)
+  // 3. List issuers (with optional status filter)
+  app.get(
+    '/v1/issuers',
+    {
+      schema: {
+        description: 'List institutional issuers with optional status filter',
+        tags: ['Issuers'],
+        querystring: {
+          type: 'object',
+          properties: {
+            status: { type: 'string' },
+          },
+        },
+      },
+    },
+    async (req: FastifyRequest<{ Querystring: { status?: string } }>, reply: FastifyReply) => {
+      const { status } = req.query as { status?: string };
+      const issuers = await prisma.issuer.findMany({
+        where: status ? { status } : undefined,
+        orderBy: { registeredAt: 'desc' },
+      });
+      return reply.send({ issuers });
+    },
+  );
+
+  // 4. Admin: list issuers (with optional status filter)
   app.get(
     '/v1/admin/issuers',
     {

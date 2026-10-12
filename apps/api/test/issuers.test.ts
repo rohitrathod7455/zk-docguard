@@ -25,19 +25,22 @@ describe('API Issuer and Admin Routes (/v1/issuers, /v1/admin/issuers)', () => {
     expiresAt: Date.now() + 86400000,
   })}`;
 
+  const cleanupTestIssuer = async () => {
+    const { prisma } = await import('../src/db/client.js');
+    const addr = testIssuerAddress.toLowerCase();
+    await prisma.credentialRecord.deleteMany({ where: { issuerAddress: addr } });
+    await prisma.issuanceBatch.deleteMany({ where: { issuerAddress: addr } });
+    await prisma.revocationLeaf.deleteMany({ where: { issuerAddress: addr } });
+    await prisma.issuer.deleteMany({ where: { address: addr } });
+  };
+
   beforeAll(async () => {
     app = await buildApp();
-    const { prisma } = await import('../src/db/client.js');
-    await prisma.issuer.deleteMany({
-      where: { address: testIssuerAddress.toLowerCase() },
-    });
+    await cleanupTestIssuer();
   });
 
   afterAll(async () => {
-    const { prisma } = await import('../src/db/client.js');
-    await prisma.issuer.deleteMany({
-      where: { address: testIssuerAddress.toLowerCase() },
-    });
+    await cleanupTestIssuer();
     await app.close();
     await disconnectPrisma();
   });
@@ -155,4 +158,17 @@ describe('API Issuer and Admin Routes (/v1/issuers, /v1/admin/issuers)', () => {
 
     expect(res.statusCode).toBe(401);
   });
+
+  it('allows public querying of issuers list via GET /v1/issuers', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/v1/issuers',
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.body);
+    expect(Array.isArray(body.issuers)).toBe(true);
+    expect(body.issuers.length).toBeGreaterThanOrEqual(1);
+  });
 });
+
