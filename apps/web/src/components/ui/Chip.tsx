@@ -5,8 +5,9 @@ import { Copy, Check } from 'lucide-react';
 import { useToast } from './Toast';
 
 export interface ChipProps {
-  value: string;
+  value?: string;
   label?: string;
+  variant?: string;
   prefixLength?: number;
   suffixLength?: number;
   truncateLength?: number;
@@ -17,12 +18,14 @@ export interface ChipProps {
 export function Chip({
   value,
   label,
+  variant: _variant,
   prefixLength = 6,
   suffixLength = 4,
   truncateLength,
   href,
   isMono = true,
 }: ChipProps) {
+  const displayVal = value ?? label ?? '';
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
@@ -37,20 +40,20 @@ export function Chip({
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      await navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(displayVal);
       setCopied(true);
-      toast.success('Copied to clipboard', truncate(value));
+      toast.success('Copied to clipboard', truncate(displayVal));
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // Fallback
     }
   };
 
-  const displayText = truncate(value);
+  const displayText = truncate(displayVal);
 
   return (
     <span
-      title={value}
+      title={displayVal}
       style={{
         display: 'inline-flex',
         alignItems: 'center',

@@ -1,9 +1,13 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import * as crypto from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 // @ts-expect-error snarkjs untyped import
 import * as snarkjs from 'snarkjs';
 import { prisma } from '../db/client.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export interface Groth16ProofPayload {
   pi_a: string[];
@@ -38,7 +42,13 @@ let cachedVKey: Record<string, unknown> | null = null;
 function getVerificationKey(): Record<string, unknown> {
   if (!cachedVKey) {
     const candidates = [
+      path.resolve(__dirname, '../../../../packages/circuits/build/verification_key.json'),
+      path.resolve(__dirname, '../../../circuits/build/verification_key.json'),
+      path.resolve(__dirname, '../../../../apps/web/public/zk/verification_key.json'),
+      path.resolve(__dirname, '../../../web/public/zk/verification_key.json'),
       path.resolve(process.cwd(), '../../packages/circuits/build/verification_key.json'),
+      path.resolve(process.cwd(), '../packages/circuits/build/verification_key.json'),
+      path.resolve(process.cwd(), 'packages/circuits/build/verification_key.json'),
       path.resolve(process.cwd(), '../web/public/zk/verification_key.json'),
       path.resolve(process.cwd(), 'verification_key.json'),
     ];

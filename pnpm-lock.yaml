@@ -120,6 +120,9 @@ importers:
       '@noble/hashes':
         specifier: ^2.4.0
         version: 2.4.0
+      '@zk-docguard/circuits':
+        specifier: workspace:^
+        version: link:../../packages/circuits
       '@zk-docguard/core':
         specifier: workspace:^
         version: link:../../packages/core
@@ -138,6 +141,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.3.0(react@19.3.0)
+      snarkjs:
+        specifier: ^0.7.5
+        version: 0.7.6
       viem:
         specifier: ^2.57.3
         version: 2.57.3(typescript@5.9.3)(zod@3.25.76)
@@ -178,12 +184,18 @@ importers:
       '@zk-docguard/api':
         specifier: workspace:^
         version: link:../apps/api
+      '@zk-docguard/circuits':
+        specifier: workspace:^
+        version: link:../packages/circuits
       '@zk-docguard/contracts':
         specifier: workspace:^
         version: link:../packages/contracts
       '@zk-docguard/core':
         specifier: workspace:^
         version: link:../packages/core
+      snarkjs:
+        specifier: ^0.7.5
+        version: 0.7.6
       viem:
         specifier: ^2.57.3
         version: 2.57.3(typescript@5.9.3)(zod@3.25.76)

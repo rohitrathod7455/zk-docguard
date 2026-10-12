@@ -1,9 +1,19 @@
 {
   "name": "@zk-docguard/circuits",
   "version": "0.1.0",
-  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "tsx scripts/build.ts",
+    "build": "tsc",
+    "circuit:build": "tsx scripts/build.ts",
     "test": "vitest run",
     "benchmark": "tsx scripts/benchmark.ts",
     "lint": "echo \"No circom lint configured\"",

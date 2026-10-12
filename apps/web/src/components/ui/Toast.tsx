@@ -19,7 +19,7 @@ interface ToastContextValue {
     info: (title: string, description?: string) => void;
     warning: (title: string, description?: string) => void;
   };
-  showToast: (type: ToastType, title: string, description?: string) => void;
+  showToast: (arg1: string, arg2?: string, arg3?: string) => void;
 }
 
 const ToastContext = createContext<ToastContextValue>({
@@ -45,6 +45,22 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     }, 4500);
   };
 
+  const showToast = (arg1: string, arg2?: string, arg3?: string) => {
+    const knownTypes: Record<string, ToastType> = {
+      success: 'success',
+      error: 'error',
+      info: 'info',
+      warning: 'warning',
+    };
+
+    if (knownTypes[arg1]) {
+      addToast(knownTypes[arg1]!, arg2 || '', arg3);
+    } else {
+      const type = (arg2 && knownTypes[arg2]) ? knownTypes[arg2]! : 'info';
+      addToast(type, arg1, arg3);
+    }
+  };
+
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
@@ -57,7 +73,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ToastContext.Provider value={{ toast, showToast: addToast }}>
+    <ToastContext.Provider value={{ toast, showToast }}>
       {children}
       <div
         style={{

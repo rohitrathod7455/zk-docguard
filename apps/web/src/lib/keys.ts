@@ -129,3 +129,22 @@ export async function restoreKeyPair(stored: StoredIssuerKey): Promise<BabyJubKe
   );
   return deriveBabyJubKeyPair(privBytes);
 }
+
+/**
+ * Resolves the BabyJubJub public key for an issuer from DID or package
+ */
+export async function resolveIssuerPublicKey(
+  issuerDid: string,
+  pkg?: unknown,
+): Promise<{ x: bigint; y: bigint }> {
+  const custom = (pkg as { issuerPublicKey?: { x: string; y: string } })?.issuerPublicKey
+    || (pkg as { vc?: { proof?: { issuerPublicKey?: { x: string; y: string } } } })?.vc?.proof?.issuerPublicKey;
+  if (custom && custom.x && custom.y) {
+    return { x: BigInt(custom.x), y: BigInt(custom.y) };
+  }
+  const parts = issuerDid.split(':');
+  const address = parts[parts.length - 1] || '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
+  const { keyPair } = await deriveIssuerBabyJubKey(address);
+  return keyPair.publicKey;
+}
+

@@ -303,3 +303,24 @@
 - **Batch Cohort Anchoring:** Graduating cohorts calculate a batch root over document hashes or credential IDs, enabling single-transaction on-chain anchoring of 50+ students with individual cryptographic inclusion verification.
 
 **Consequence:** End-to-end zero-knowledge compliance, absolute immunity to server-side document interception, and sub-100k gas batch anchoring on EVM chains.
+
+---
+
+## D-020: In-Browser Web Worker Groth16 Proving and PBKDF2/AES-GCM Encrypted SSI Vault
+
+**Context:** The Holder SSI Wallet in Phase 7 must provide self-sovereign identity storage, client-side document decryption, and client-side zero-knowledge proof generation. Generating Groth16 proofs involves compute-heavy multi-scalar multiplications and FFT witness evaluations over BN254. Running this on the browser UI thread freezes user interaction, animations, and can trigger browser unresponsive script prompts. Furthermore, holder keys and credentials must be persisted safely without server exposure or plaintext `localStorage` vulnerabilities.
+
+**Alternatives:**
+1. Server-side proof generation or delegated cloud proving service (violates privacy; server learns hidden attributes, salts, and secret).
+2. Main-thread in-browser `snarkjs` proving (causes 2-5 second UI freezes and dropped frames).
+3. Web Worker off-thread `snarkjs` proving with structured event streaming, graceful main-thread fallback, and WebCrypto PBKDF2 (600,000 iterations, SHA-256) + AES-GCM (256-bit) local vault encryption.
+
+**Choice:** Choice 3 — Dedicated Web Worker proving architecture and zero-knowledge encrypted vault:
+- **Off-Thread Web Worker Prover (`proving.worker.ts`):** Groth16 witness calculation and `snarkjs.groth16.fullProve` run inside an isolated Web Worker. Proving progress (0% -> 20% -> 60% -> 90% -> 100%) is streamed via message events, keeping UI responsiveness and step animations 60 FPS fluid.
+- **Client-Side Encrypted SSI Vault (`vault.ts`):** Generates gasless self-sovereign identity keys (`holderSecret`, Poseidon `holderCommitment`, `did:key:z...`). Stores credentials, private salts, and audit history encrypted under a user passphrase using PBKDF2 (600,000 iterations, SHA-256, 16-byte random salt) and AES-GCM-256 (12-byte fresh IV). Plaintext data is never written to disk or network.
+- **Client-Side Document Unwrapping:** Document attachments are retrieved as encrypted ciphertexts from IPFS and decrypted client-side using the symmetric document key stored in the holder vault. Plaintext documents are never transmitted to the verifier or server.
+- **Strict Network Wire Privacy Guard:** The generated presentation package contains strictly the Groth16 proof, 26 public signals, and revealed attributes. Unrevealed attributes, salts, and the holder secret are asserted strictly absent from wire serialization.
+- **Encrypted Archive Backup & Migration:** Portable encrypted JSON archive export and import allows cross-device vault restoration while guaranteeing zero-knowledge confidentiality at rest.
+
+**Consequence:** High-performance, uncompromised holder privacy, zero-leakage selective disclosure, and responsive user experience even on mid-tier hardware.
+

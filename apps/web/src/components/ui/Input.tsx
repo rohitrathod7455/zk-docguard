@@ -5,13 +5,15 @@ import React, { InputHTMLAttributes, forwardRef, ReactNode } from 'react';
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   hint?: string;
+  helperText?: string;
   error?: string;
   leftAddon?: ReactNode;
   rightAddon?: ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, hint, error, leftAddon, rightAddon, id, style, ...props }, ref) => {
+  ({ label, hint, helperText, error, leftAddon, rightAddon, id, style, ...props }, ref) => {
+    const finalHint = hint ?? helperText;
     const inputId = id || (label ? `input-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
 
     return (
@@ -91,8 +93,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
 
-        {hint && !error && (
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{hint}</span>
+        {finalHint && !error && (
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{finalHint}</span>
         )}
 
         {error && (

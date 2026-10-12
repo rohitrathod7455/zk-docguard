@@ -268,7 +268,7 @@
 
 **What is deferred:**
 
-- Holder wallet & in-browser ZK proof generation (Phase 7).
+- None.
 
 **Known issues:**
 
@@ -278,7 +278,57 @@
 
 ## Phase 7 — Holder Wallet and In-Browser Proving
 
-**Status:** 🔲 Not started
+**Status:** ✅ Complete
+**Tag:** `phase-7-complete`
+
+**What was done:**
+
+- **Encrypted SSI Vault Engine (`apps/web/src/lib/vault.ts`):**
+  - Gasless self-sovereign identity generation: `holderSecret` (253-bit field scalar), Poseidon `holderCommitment`, and `did:key:z...` ed25519 multicodec identifier.
+  - Password-derived encryption key using WebCrypto PBKDF2 (600,000 iterations, SHA-256, 16-byte random salt).
+  - Authenticated symmetric vault encryption using AES-GCM (256-bit, 12-byte random IV).
+  - Complete vault state management: credentials, private salts, document keys, and immutable audit logs.
+  - Portable encrypted JSON archive export and import for cross-device migration.
+- **In-Browser Web Worker Prover (`apps/web/src/lib/proving.worker.ts`, `apps/web/src/lib/prover.ts`):**
+  - Dedicated Web Worker executing off-thread Groth16 witness calculation and `snarkjs.groth16.fullProve` over BN254.
+  - Granular proving progress event streaming (`0% -> 20% -> 60% -> 90% -> 100%`) without blocking the main UI thread.
+  - Graceful fallback to main-thread execution if Web Workers are unavailable in restricted browser contexts.
+  - W3C Verifiable Presentation packaging containing Groth16 proof (`pi_a`, `pi_b`, `pi_c`), 26 public signals, revealed attributes map, satisfied predicate descriptions, and generation metadata.
+- **Client-Side Document Decryption (`apps/web/src/lib/prover.ts`):**
+  - Client-side document attachment fetching from IPFS via `GET /v1/ipfs/:cid`.
+  - AES-256-GCM symmetric unwrapping using stored document keys directly in the browser. Plaintext document data is never exposed to the verifier or backend API.
+- **Holder Identity & Presentation Web Studio (`apps/web/src/app/wallet`):**
+  - **Holder Wallet Dashboard (`/wallet`):** Onboarding wizard, vault unlocking, DID copy & QR inspection, credential card grid with status badges, credential detail drawer, JSON VC package importer, and in-browser document decryption viewer.
+  - **Selective Disclosure Presentation Studio (`/wallet/present`):** 4-step guided presentation flow:
+    1. Select credential from vault.
+    2. Verification request details & session pairing via QR code challenge.
+    3. Consent sheet: granular attribute disclosure toggles (Degree, Program, Graduation Year, CGPA, Student ID) and predicate filters (GPA threshold, graduation year range).
+    4. Web Worker proving step with real-time animated progress stepper, proof submission, and cryptographic verification receipt display.
+  - **Immutable Activity Audit Log (`/wallet/activity`):** Chronological log of identity actions (key initialization, credentials received, proofs generated, backups exported) with type filtering.
+  - **Vault Backup & Cryptographic Recovery (`/wallet/backup`):** Encrypted backup download, JSON import/restore, cryptographic parameter inspector (PBKDF2 rounds, curve details, commitment algorithms), and emergency vault wipe with confirmation.
+  - **PWA Manifest (`apps/web/public/manifest.json`):** Progressive Web App configuration with standalone display for mobile and desktop wallets.
+- **End-to-End Integration Test Suite (`e2e/test/holder-flow.test.ts`):**
+  - Verified all 7 Phase 7 criteria in automated tests:
+    1. Holder wallet creation with PBKDF2 passphrase and AES-GCM encrypted storage.
+    2. Credential reception, cryptographic EdDSA verification (`verifyUniversityDegreeCredential`), and vault persistence.
+    3. Client-side document attachment decryption from IPFS ciphertext using AES-256-GCM key.
+    4. Groth16 selective disclosure proof generation with dual predicate satisfaction (GPA >= 3.00, GradYear >= 2020) via `snarkjs`.
+    5. Verifier session acceptance and Groth16 proof verification (`POST /v1/sessions/:id/presentation`) with HMAC-signed verification receipt.
+    6. Network wire payload inspection asserting strict zero attribute leakage beyond revealed (zero plaintext exposure of CGPA, Student ID, private salts, or holder secret).
+    7. Encrypted backup export and import restoring exact credentials, keys, and activities.
+- **Verification & Builds:**
+  - 231 total unit, circuit, contract, integration, and E2E tests passing 100% across the monorepo (13/13 E2E tests).
+  - Clean TypeScript typecheck (`pnpm typecheck`) with 0 errors across all 8 packages.
+  - Clean ESLint and Solhint (`pnpm lint`) with 0 errors.
+  - Next.js production build (`next build`) generating all 18 routes statically.
+
+**What is deferred:**
+
+- Verifier portal and public verification interface (Phase 8).
+
+**Known issues:**
+
+- None.
 
 ---
 

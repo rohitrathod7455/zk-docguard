@@ -258,3 +258,98 @@ export async function recordRevocation(payload: {
     return { ok: false, error: (err as Error).message };
   }
 }
+
+export async function getCiphertextFromIpfs(cid: string): Promise<{ ciphertext: string; size: number }> {
+  const res = await fetch(`${API_BASE_URL}/v1/ipfs/${cid}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch IPFS object`);
+  const buf = await res.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  const base64 =
+    typeof Buffer !== 'undefined'
+      ? Buffer.from(bytes).toString('base64')
+      : btoa(Array.from(bytes, (b) => String.fromCharCode(b)).join(''));
+  return { ciphertext: base64, size: bytes.byteLength };
+}
+
+export const api = {
+  issuers: {
+    getAll: getIssuers,
+    apply: applyIssuer,
+  },
+  credentials: {
+    getAll: getCredentials,
+    anchor: recordCredentialAnchor,
+  },
+  revocations: {
+    record: recordRevocation,
+  },
+  ipfs: {
+    upload: uploadCiphertextToIpfs,
+    get: getCiphertextFromIpfs,
+  },
+  sessions: {
+    async create(body: {
+      verifierName: string;
+      domain: string;
+      request?: Record<string, unknown>;
+      requestedClaims?: Record<string, unknown>;
+    }) {
+      const payload = {
+        verifierName: body.verifierName,
+        domain: body.domain,
+        request: body.request || body.requestedClaims || {},
+      };
+      const res = await fetch(`${API_BASE_URL}/v1/sessions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    },
+    async get(id: string) {
+      const res = await fetch(`${API_BASE_URL}/v1/sessions/${id}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return { session: data };
+    },
+    async submitPresentation(
+      id: string,
+      presentation: {
+        proof: {
+          pi_a: string[];
+          pi_b: string[][];
+          pi_c: string[];
+          publicSignals: string[];
+        };
+      }
+    ) {
+      const groth16 = presentation.proof;
+      const body = {
+        proof: {
+          pi_a: groth16.pi_a,
+          pi_b: groth16.pi_b,
+          pi_c: groth16.pi_c,
+          protocol: 'groth16',
+          curve: 'bn128',
+        },
+        publicSignals: groth16.publicSignals,
+      };
+      const res = await fetch(`${API_BASE_URL}/v1/sessions/${id}/presentation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || 'Presentation verification failed');
+      }
+      return {
+        ok: true,
+        receipt: data.receipt,
+        receiptSig: data.receipt?.receiptSignature,
+      };
+    },
+  },
+};
+

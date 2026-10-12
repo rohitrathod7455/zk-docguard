@@ -13,8 +13,10 @@
   "dependencies": {
     "@noble/hashes": "^2.4.0",
     "@zk-docguard/api": "workspace:^",
+    "@zk-docguard/circuits": "workspace:^",
     "@zk-docguard/contracts": "workspace:^",
     "@zk-docguard/core": "workspace:^",
+    "snarkjs": "^0.7.5",
     "viem": "^2.57.3"
   },
   "devDependencies": {
