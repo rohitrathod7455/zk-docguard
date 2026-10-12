@@ -1,0 +1,190 @@
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+/* =========================================================================
+   Typography Deliberate Scale (12/14/16/20/28/40)
+   ========================================================================= */
+
+h1,
+h2,
+h3,
+.font-serif {
+  font-family: var(--font-serif), 'Newsreader', Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+h1 {
+  font-size: 2.5rem; /* 40px */
+  line-height: 1.15;
+}
+
+h2 {
+  font-size: 1.75rem; /* 28px */
+  line-height: 1.25;
+}
+
+h3 {
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.35;
+}
+
+h4 {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+p,
+.text-body {
+  font-size: 1rem; /* 16px */
+  color: var(--text-secondary);
+}
+
+.text-sm {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.45;
+}
+
+.text-xs {
+  font-size: 0.75rem; /* 12px */
+  line-height: 1.4;
+}
+
+.font-mono,
+code,
+pre,
+kbd {
+  font-family: var(--font-mono), 'JetBrains Mono', 'IBM Plex Mono', monospace;
+  font-feature-settings: 'zero' 1;
+}
+
+/* =========================================================================
+   Focus Rings & Accessibility
+   ========================================================================= */
+
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =========================================================================
+   Layout & Grid Utilities (12-column institutional layout)
+   ========================================================================= */
+
+.app-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+/* =========================================================================
+   Hairline Institutional Table Styles
+   ========================================================================= */
+
+.zk-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+.zk-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.zk-table th {
+  padding: 0.75rem 1rem;
+  background: var(--bg-surface-muted);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-default);
+  white-space: nowrap;
+}
+
+.zk-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.zk-table tr:last-child td {
+  border-bottom: none;
+}
+
+.zk-table tr:hover td {
+  background: var(--bg-surface-elevated);
+}
+
+/* =========================================================================
+   Print Stylesheet (Verification Receipt Archival Printing)
+   ========================================================================= */
+
+@media print {
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .printable-receipt {
+    border: 1px solid #000000 !important;
+    box-shadow: none !important;
+    padding: 2rem !important;
+    max-width: 100% !important;
+  }
+}

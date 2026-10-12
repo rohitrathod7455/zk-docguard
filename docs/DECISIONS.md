@@ -265,4 +265,26 @@
 
 **Consequence:** Ciphertext CIDs are mathematically identical to IPFS Kubo CIDs, allowing seamless offline development, automated testing, and transparent migration to live IPFS nodes.
 
+---
+
+## D-018: Archival Hairline Design System and Strict Banned Patterns Compliance
+
+**Context:** Academic, legal, and institutional verification interfaces demand extreme visual credibility, dignity, and calm readability. Many modern Web3 apps suffer from generic purple gradients, neon glows, glassmorphism, and cartoon emojis that undermine academic and institutional trust.
+
+**Alternatives:**
+1. Generic component library (e.g., standard Tailwind, Radix themes, or Shadcn default theme with heavy rounded corners).
+2. Web3 neo-brutalism or dark glow cyberpunk aesthetic.
+3. Custom archival hairline design system rooted in warm archival paper (`#F6F4EE`), deep archival ink (`#15181D`), and deep verdigris (`#0E5A4E`) with 1px borders, Newsreader serif, IBM Plex Sans, and JetBrains Mono.
+
+**Choice:** Custom Archival Hairline Design System conforming strictly to Section 9 Banned Patterns:
+- **Zero purple/pink gradients, zero neon glows, zero glassmorphism blur halos.**
+- **Zero emojis** (Lucide 1.5px stroke icons only).
+- **Crisp 2-4px border radii** (strict prohibition of oversized pill or 16-24px bubble corners on institutional elements).
+- **Archival double-frame certificates and printable verification receipts** styled with print media stylesheets.
+- **Full WCAG 2.2 AA contrast compliance** and `prefers-reduced-motion` accessibility support.
+
+**Consequence:** The web interface presents an authoritative, government-grade and university-grade aesthetic, suitable for high-stakes credential verification and patent presentation.
+
+
+
 

@@ -162,7 +162,56 @@
 
 ## Phase 5 — Design System and Web Shell
 
-**Status:** 🔲 Not started
+**Status:** ✅ Complete
+
+**What was done:**
+
+- Configured Next.js 15 App Router with Google Fonts: `Newsreader` (editorial serif), `IBM_Plex_Sans` (neutral grotesque), and `JetBrains_Mono` (cryptographic values).
+- Implemented institutional Design System tokens (`apps/web/src/styles/tokens.css` and `globals.css`) for warm archival paper light theme (`#F6F4EE`, ink `#15181D`, verdigris `#0E5A4E`) and true institutional dark slate theme (`#0F1216`, surface `#161A20`, accent `#1EB69E`).
+- Implemented `ThemeProvider` with localStorage persistence and system color preference detection.
+- Implemented `WalletProvider` & `WalletModal` supporting role switching (`public`, `issuer`, `holder`, `verifier`, `admin`), network indicator (Hardhat 31337 / Amoy 80002 / Sepolia 11155111), and 4 pre-seeded demo accounts (Admin, Northfield University Issuer, Alex Vance Holder, State Board Verifier).
+- Implemented global `ToastProvider` with accessible notifications and auto-dismiss.
+- Implemented core reusable UI components:
+  - `Button`: Primary verdigris, secondary outline, ghost, danger, sizes (sm, md, lg), and loading spinners.
+  - `Input`: Labels, hints, validation error states, prefix/suffix addons.
+  - `Select`: Hairline options, custom chevron.
+  - `Badge`: Semantic status tags (`valid`, `revoked`, `pending`, `neutral`, `accent`).
+  - `Chip`: Monospace copyable chips with tooltip, copy feedback, and middle truncation for DIDs, CIDs, and hashes.
+  - `Card`: Institutional card with header, subtitle, actions, and archival borders.
+  - `Dialog`: Accessible modal with backdrop blur, focus trapping, and Escape key dismissal.
+  - `Tabs`: Underline institutional tab strip.
+  - `Stepper`: Real progressive stepper with step status and elapsed millisecond indicators.
+  - `EmptyState`: Contextual empty states with title, description, and primary CTA.
+- Implemented Section 9 signature components:
+  - `CredentialCard`: Certificate double-frame aesthetic, seal watermark, serif degree title, holder details, and cryptographic chips.
+  - `VerificationReceipt`: Printable archival receipt with verified attributes, in-circuit satisfied predicates, HMAC signature, print stylesheet, and JSON download.
+  - `ConsentSheet`: Pre-proving verification consent sheet showing verbatim disclosed attributes, proven predicates, and hidden confidential attributes.
+  - `QRCodeDisplay`: Crisp QR code generator using HTML canvas with copy and download actions.
+- Implemented Web Shell:
+  - `AppHeader`: Institutional branding, network pill, role switcher, design system link, theme toggle, wallet button.
+  - `AppNavigation`: Secondary role-based navigation reflecting active persona routes.
+  - `AppFooter`: W3C VC 1.1, Groth16 BN254, DID:ethr, and academic attribution.
+  - `HomePage`: Hero statement, live document hash lookup drop zone, and 4 protocol pillars.
+- Implemented interactive Component Gallery & Documentation page at `/design`:
+  - Architecture & Color tokens
+  - Base UI Primitives interactive testbench
+  - Signature Components interactive showcase
+  - Banned Patterns Compliance Sign-Off:
+    - [x] Zero purple/pink or neon gradients
+    - [x] Zero glassmorphism or blur halos
+    - [x] Zero emoji (Lucide icons only)
+    - [x] 2-4px crisp radii (no oversized rounded-2xl corners)
+    - [x] Archival Newsreader serif + IBM Plex Sans + JetBrains Mono
+    - [x] WCAG 2.2 AA contrast compliance & `prefers-reduced-motion`
+- Production build verified: `next build` static export succeeded with 0 errors (`/`, `/design`, `/_not-found`). Monorepo passing 212 tests, clean typecheck, and clean lint.
+
+**What is deferred:**
+
+- Role-specific view implementations (Issuer console in Phase 6, Holder wallet in Phase 7, Verifier portal in Phase 8).
+
+**Known issues:**
+
+- None
 
 ---
 
