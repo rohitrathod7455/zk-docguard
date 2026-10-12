@@ -189,3 +189,34 @@
 
 **Consequence:** The SMT non-membership witness format matches the circomlib `SMTVerifier` component (`oldKey`, `oldValue`, `isOld0`, `siblings[nLevels]`, `fnc = 1`), enabling drop-in integration with the Mode B circuit.
 
+---
+
+## D-013: Powers of Tau Ceremony Sizing (k=14) for DiscloseModeA Circuit
+
+**Context:** Groth16 circuit compilation and trusted setup ceremony require a Powers of Tau (tauG1/tauG2) parameter file sized to the circuit's R1CS constraint count.
+
+**Measured Data:**
+- Non-linear R1CS constraints: 9,144
+- Total wires: 9,146
+- Public signals: 26 (1 public output `credentialId` + 25 public inputs)
+
+**Alternatives:**
+1. $k=13$ ($2^{13} = 8,192$ constraints capacity): Insufficient for 9,144 constraints.
+2. $k=14$ ($2^{14} = 16,384$ constraints capacity): 44.2% headroom above 9,144 constraints.
+3. $k=15$ ($2^{15} = 32,768$ constraints capacity): Unnecessarily doubles `.ptau` and `.zkey` sizes.
+
+**Choice:** $k=14$ Powers of Tau (`pot14_final.ptau`).
+
+**Consequence:** Compact zkey size (5.47 MB) and fast proving time (~1,100 ms in browser/Node WASM) with complete cryptographic security.
+
+---
+
+## D-014: Inequality Predicate Masking and Expiration Constraint Semantics
+
+**Context:** Provers verify inequality claims (e.g. CGPA $\ge 8.00$, GradYear $\ge 2025$) and expiration validity without leaking unrevealed attribute values.
+
+**Design:**
+1. **Inequality Predicate Masking:** To prevent 253-bit field hashes (such as `studentIdHash` or `schemaId`) from overflowing 64-bit comparators when a predicate is disabled, the operand values are masked: `effectiveVal <== predEnable * val` and `effectiveThresh <== predEnable * threshold`. Both are range-checked with `Num2Bits(64)` and compared via `GreaterEqThan(64)`. When `predEnable == 0`, both operands are 0, safely passing range checks.
+2. **Expiration Semantics:** Slot 7 represents expiry UNIX seconds. The circuit allows credentials where `values[7] == 0` (permanent/unexpiring) OR `values[7] >= currentTime`. If `values[7] > 0` and `values[7] < currentTime`, the constraint `(1 - isZero.out) * (1 - ge.out) === 0` strictly rejects.
+3. **Challenge Squaring:** `challengeSquare <== challenge * challenge` binds the verifier's challenge nonce into the R1CS constraint graph, preventing optimization pruning.
+

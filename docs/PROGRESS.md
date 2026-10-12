@@ -92,7 +92,32 @@
 
 ## Phase 3 — Circuits and Trusted Setup
 
-**Status:** 🔲 Not started
+**Status:** ✅ Complete
+
+**What was done:**
+
+- Implemented modular Circom circuit architecture in `packages/circuits/circuits/`:
+  - `templates/attribute_commit.circom`: Salted leaf commitment template computing $leaf_i = \text{Poseidon}(value_i, salt_i)$.
+  - `templates/credential_tree.circom`: Depth-3 binary Merkle commitment tree matching `@zk-docguard/core` layer hashing.
+  - `templates/holder_binding.circom`: Cryptographic holder identity binding ($values[0] \equiv \text{Poseidon}(holderSecret)$).
+  - `templates/disclosure.circom`: Zero-leakage selective disclosure with boolean reveal mask enforcement.
+  - `templates/predicate.circom`: Inequality predicates ($values[predIndex] \ge predThreshold$) with operand masking and 64-bit bounds checks.
+  - `templates/disclose.circom` & `disclose.circom`: Main Mode A circuit integrating all sub-templates, BabyJubJub EdDSA-Poseidon signature verification on `credentialRoot`, expiry checks, challenge squaring dummy constraint, and public domain-separated `credentialId` output.
+- Compiled circuit with Circom 2.1.9: **9,144 non-linear constraints**, 9,146 wires, 26 public signals (1 public output + 25 public inputs).
+- Powers of Tau ceremony executed for $k=14$ ($2^{14} = 16,384$ points capacity), followed by Groth16 Phase 2 trusted setup, zkey contribution, and verification with snarkjs 0.7.6.
+- Exported verification artifacts: `verification_key.json` and Solidity verifier `Groth16Verifier.sol` synced to `packages/contracts/src/verifiers/Groth16Verifier.sol` and `apps/web/public/zk/`.
+- Implemented typed `generateCircuitInputs` in `packages/circuits/src/input-generator.ts` bridging `@zk-docguard/core` `CredentialPackage` and presentation queries to circuit inputs.
+- 10 comprehensive circuit tests in `packages/circuits/test/circuit.test.ts` covering positive end-to-end proof and all negative constraint failure modes (tampered attribute, wrong issuer key, forged signature, expired credential, unmet predicate, reveal mask mismatch, secret mismatch, tampered challenge).
+- On-chain Solidity verification test in `packages/contracts/test/Groth16Verifier.test.ts` validating real Groth16 proof verification on EVM with measured gas of **384,633 gas** and rejection of tampered public inputs.
+- Benchmarked circuit performance across 5 iterations: **1,100.30 ms** average proving time, **19.77 ms** off-chain verification time, **723 bytes** proof size, **5.47 MB** zkey size. Saved in `benchmarks/results/circuit-benchmarks.json`.
+
+**What is deferred:**
+
+- Mode B circuit (sparse Merkle tree non-revocation proof in-circuit) is designated for Phase 9.
+
+**Known issues:**
+
+- None
 
 ---
 

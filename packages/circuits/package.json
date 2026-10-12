@@ -3,18 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "echo \"Circuits build — see Phase 3\"",
-    "test": "echo \"No circuit tests yet — Phase 3\"",
+    "build": "tsx scripts/build.ts",
+    "test": "vitest run",
+    "benchmark": "tsx scripts/benchmark.ts",
     "lint": "echo \"No circom lint configured\"",
     "typecheck": "tsc --noEmit",
-    "clean": "rimraf build"
+    "clean": "rimraf build ptau"
   },
   "devDependencies": {
+    "@types/node": "^22.10.1",
     "circomlib": "^2.0.5",
     "circomlibjs": "^0.1.7",
-    "snarkjs": "^0.7.5",
-    "typescript": "^5.6.3",
     "rimraf": "^6.0.1",
-    "@types/node": "^22.10.1"
+    "snarkjs": "^0.7.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@zk-docguard/core": "workspace:^"
   }
 }

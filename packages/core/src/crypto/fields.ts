@@ -124,3 +124,5 @@ export function hexToField(hex: string): bigint {
   const clean = hex.startsWith('0x') || hex.startsWith('0X') ? hex.slice(2) : hex;
   return toFieldElement(BigInt('0x' + (clean || '0')));
 }
+
+export const fieldToBigInt = toFieldElement;

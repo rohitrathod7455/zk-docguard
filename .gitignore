@@ -38,12 +38,13 @@ cache_hardhat/
 gas-report.txt
 
 # ZK artifacts (large binaries)
-packages/circuits/build/*.ptau
-packages/circuits/build/*.zkey
-packages/circuits/build/*.wasm
-packages/circuits/build/*.r1cs
-# Keep verification keys
+packages/circuits/build/
+packages/circuits/ptau/
+apps/web/public/zk/*.zkey
+apps/web/public/zk/*.wasm
+# Keep verification keys and verifiers
 !packages/circuits/build/verification_key.json
+!apps/web/public/zk/verification_key.json
 
 # Logs
 *.log

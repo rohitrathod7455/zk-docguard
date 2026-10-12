@@ -126,6 +126,10 @@ importers:
         version: 6.1.3
 
   packages/circuits:
+    dependencies:
+      '@zk-docguard/core':
+        specifier: workspace:^
+        version: link:../core
     devDependencies:
       '@types/node':
         specifier: ^22.10.1
@@ -142,9 +146,15 @@ importers:
       snarkjs:
         specifier: ^0.7.5
         version: 0.7.6
+      tsx:
+        specifier: ^4.19.2
+        version: 4.23.15
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.5)
 
   packages/config: {}
 

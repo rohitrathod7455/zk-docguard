@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-10-12T05:16:14.953Z",
+  "circuit": "DiscloseModeA",
+  "constraints": 9144,
+  "wires": 9146,
+  "publicInputs": 25,
+  "publicOutputs": 1,
+  "totalPublicSignals": 26,
+  "powersOfTauDegree": 14,
+  "powersOfTauCapacity": 16384,
+  "provingSystem": "Groth16",
+  "curve": "BN254 (alt_bn128)",
+  "timing": {
+    "averageProvingTimeMs": 1100.3,
+    "minProvingTimeMs": 806.53,
+    "maxProvingTimeMs": 2098,
+    "averageVerificationTimeMs": 19.77,
+    "iterations": 5
+  },
+  "artifacts": {
+    "zkeySizeBytes": 5739969,
+    "wasmSizeBytes": 2842334,
+    "vkeySizeBytes": 7500,
+    "proofSizeBytes": 723
+  },
+  "onChainVerification": {
+    "contract": "Groth16Verifier.sol",
+    "measuredGas": 384633,
+    "evmVersion": "paris"
+  }
+}
