@@ -62,19 +62,25 @@ async function main() {
   }
 
   // 3. Groth16 circuit-specific trusted setup (Phase 2)
-  console.log('\n[3/6] Running Groth16 phase 2 ceremony...');
-  const zkey0 = path.resolve(BUILD_DIR, 'disclose_0000.zkey');
+  const forceRebuild = process.argv.includes('--force');
   const zkeyFinal = path.resolve(BUILD_DIR, 'disclose_final.zkey');
 
-  run(`snarkjs groth16 setup "${r1csPath}" "${potFinal}" "${zkey0}"`);
-  run(
-    `snarkjs zkey contribute "${zkey0}" "${zkeyFinal}" --name="ZK-DocGuard Dev Phase 2" -v -e="zkdocguard-circuit-entropy-contribution-2026"`,
-  );
-  if (fs.existsSync(zkey0)) fs.unlinkSync(zkey0);
+  if (!fs.existsSync(zkeyFinal) || forceRebuild) {
+    console.log('\n[3/6] Running Groth16 phase 2 ceremony...');
+    const zkey0 = path.resolve(BUILD_DIR, 'disclose_0000.zkey');
+    run(`snarkjs groth16 setup "${r1csPath}" "${potFinal}" "${zkey0}"`);
+    run(
+      `snarkjs zkey contribute "${zkey0}" "${zkeyFinal}" --name="ZK-DocGuard Dev Phase 2" -v -e="zkdocguard-circuit-entropy-contribution-2026"`,
+    );
+    if (fs.existsSync(zkey0)) fs.unlinkSync(zkey0);
 
-  // 4. Verify zkey
-  console.log('\n[4/6] Verifying final zkey...');
-  run(`snarkjs zkey verify "${r1csPath}" "${potFinal}" "${zkeyFinal}"`);
+    // 4. Verify zkey
+    console.log('\n[4/6] Verifying final zkey...');
+    run(`snarkjs zkey verify "${r1csPath}" "${potFinal}" "${zkeyFinal}"`);
+  } else {
+    console.log('\n[3/6] Using cached final zkey disclose_final.zkey');
+    console.log('\n[4/6] Skipping zkey verification (cached)');
+  }
 
   // 5. Export verification key and Solidity verifier
   console.log('\n[5/6] Exporting verification key and Solidity verifier...');
@@ -93,6 +99,10 @@ async function main() {
   fs.copyFileSync(zkeyFinal, path.resolve(WEB_PUBLIC_ZK_DIR, 'disclose_final.zkey'));
   fs.copyFileSync(vkeyPath, path.resolve(WEB_PUBLIC_ZK_DIR, 'verification_key.json'));
 
+  // 7. Regenerate matched test proof fixture
+  console.log('\n[7/7] Generating synchronized test proof fixture...');
+  run('tsx scripts/generate-fixture.ts', pkgRoot);
+
   console.log('\n====================================================');
   console.log('✅ Circuit build and trusted setup completed successfully!');
   console.log('====================================================');
@@ -100,6 +110,8 @@ async function main() {
   console.log(`- Powers of Tau size: 2^14 = 16,384`);
   console.log(`- Sol Verifier:      packages/contracts/src/verifiers/Groth16Verifier.sol`);
   console.log(`- Web ZK Assets:     apps/web/public/zk/ (wasm, zkey, vkey)`);
+  console.log(`- Proof Fixture:     packages/contracts/test/fixtures/groth16-proof-fixture.json`);
+  process.exit(0);
 }
 
 main().catch((err) => {

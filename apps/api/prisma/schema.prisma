@@ -1,0 +1,106 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Issuer {
+  address          String             @id // 0x... lowercase Ethereum address
+  did              String
+  zkKeyHash        String             @unique // 0x... 32-byte hex of BabyJubJub public key hash
+  metadataURI      String
+  status           String             // "Pending", "Active", "Suspended", "Revoked"
+  registeredAt     DateTime           @default(now())
+  keyEpoch         Int                @default(0)
+  approvedAt       DateTime?
+  updatedAt        DateTime           @updatedAt
+  batches          IssuanceBatch[]
+  credentials      CredentialRecord[]
+  revocationLeaves RevocationLeaf[]
+}
+
+model IssuanceBatch {
+  id            String   @id @default(uuid())
+  issuerAddress String
+  issuer        Issuer   @relation(fields: [issuerAddress], references: [address])
+  batchRoot     String   // 0x... 32-byte hex
+  count         Int
+  manifestCid   String
+  txHash        String?
+  createdAt     DateTime @default(now())
+}
+
+model CredentialRecord {
+  docHash       String   @id // 0x... 32-byte hex SHA-256 of document
+  credentialId  String   @unique // 0x... 32-byte hex domain-separated ID
+  schemaId      String   // 0x... 32-byte hex schema identifier
+  cid           String   // IPFS ciphertext CID
+  status        String   // "Valid", "Revoked", "Expired"
+  txHash        String?
+  issuerAddress String
+  issuer        Issuer   @relation(fields: [issuerAddress], references: [address])
+  issuedAt      DateTime @default(now())
+  expiry        BigInt   // UNIX timestamp seconds (0 for permanent)
+}
+
+model VerificationSession {
+  id           String   @id @default(uuid())
+  verifierName String
+  domain       String
+  requestJson  String   // JSON string of PresentationRequest
+  nonce        String   @unique
+  challenge    String   // Poseidon(nonce, domainHash) string
+  expiresAt    DateTime
+  status       String   // "PENDING", "VERIFIED", "REJECTED", "EXPIRED"
+  resultJson   String?  // JSON string of VerificationReceipt
+  receiptSig   String?  // Verifier or server receipt signature
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model RevocationLeaf {
+  id            String   @id @default(uuid())
+  issuerKeyHash String   // 0x... 32-byte hex
+  credentialId  String   // 0x... 32-byte hex
+  revokedAt     DateTime @default(now())
+  smtIndex      Int?
+  issuerAddress String?
+  issuer        Issuer?  @relation(fields: [issuerAddress], references: [address])
+
+  @@unique([issuerKeyHash, credentialId])
+}
+
+model SmtRoot {
+  id            String   @id @default(uuid())
+  issuerKeyHash String   // 0x... 32-byte hex
+  root          String   // 0x... 32-byte hex
+  epoch         Int
+  txHash        String?
+  createdAt     DateTime @default(now())
+
+  @@index([issuerKeyHash, epoch])
+}
+
+model PinRecord {
+  cid       String   @id
+  size      Int
+  pinnedAt  DateTime @default(now())
+  metadata  String?  // JSON string
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  actor     String   // wallet address, "system", or "anon"
+  details   String?  // JSON string (strictly no personal data)
+  timestamp DateTime @default(now())
+}
+
+model SiweNonce {
+  nonce     String   @id
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}

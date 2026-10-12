@@ -1,7 +1,20 @@
-import { describe, it, expect } from 'vitest';
-import { app } from '../src/server.js';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { FastifyInstance } from 'fastify';
+import { buildApp } from '../src/server.js';
+import { disconnectPrisma } from '../src/db/client.js';
 
 describe('API health', () => {
+  let app: FastifyInstance;
+
+  beforeAll(async () => {
+    app = await buildApp();
+  });
+
+  afterAll(async () => {
+    await app.close();
+    await disconnectPrisma();
+  });
+
   it('returns health status', async () => {
     const response = await app.inject({
       method: 'GET',

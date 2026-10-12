@@ -53,3 +53,11 @@ pnpm-debug.log*
 # Secrets
 *.pem
 *.key
+
+# Local database and IPFS store
+*.db
+**/*.db
+*.db-journal
+**/*.db-journal
+.ipfs_store/
+**/.ipfs_store/

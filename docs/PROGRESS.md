@@ -123,7 +123,40 @@
 
 ## Phase 4 — Backend and Indexer
 
-**Status:** 🔲 Not started
+**Status:** ✅ Complete
+
+**What was done:**
+
+- Configured Prisma schema with SQLite for zero-dependency local development and testing (`apps/api/prisma/schema.prisma`).
+- Implemented `apps/api/src/db/client.ts` with singleton Prisma client and graceful teardown.
+- Implemented `apps/api/src/auth/siwe.ts`: replay-safe cryptographic nonces, viem EIP-4361 verification, role determination (`admin`, `issuer`, `user`), and HMAC-SHA256 session cookie sealing.
+- Implemented `apps/api/src/ipfs/client.ts`: Kubo HTTP RPC client (`/api/v0/add`, `/api/v0/cat`) with deterministic content-addressed sha2-256 fallback store, tracking pins in `PinRecord`.
+- Implemented `apps/api/src/services/verification.ts`: Groth16 verification via `snarkjs`, challenge binding match, $\pm 5$ min timestamp tolerance, issuer key hash trust check, database and SMT revocation verification, and HMAC-SHA256 verification receipt signing.
+- Implemented `apps/api/src/services/events.ts`: SSE EventEmitter manager for real-time verification session status delivery to verifiers.
+- Implemented `apps/api/src/indexer/worker.ts`: Viem blockchain indexer with reorg-safety, block confirmation depth, rollback recovery, and state tracking.
+- Implemented Fastify 5 REST routes:
+  - `/v1/auth`: SIWE nonce generation, signature verification, `/v1/auth/me` introspection, and `/v1/auth/logout`.
+  - `/v1/issuers` & `/v1/admin/issuers`: institutional applications, directory queries, and admin approval/suspension/reinstatement.
+  - `/v1/ipfs`: ciphertext upload, retrieval, and status checks.
+  - `/v1/credentials`: on-chain anchored credential metadata registration and lookup.
+  - `/v1/revocations`: issuer revocation recording and SMT non-membership exclusion witness generation for Mode B.
+  - `/v1/sessions`: verification session creation with QR payload, challenge generation, Groth16 presentation proof submission, and SSE live streams (`/v1/sessions/:id/events`).
+  - `/v1/verify`: public direct proof verification and batch status queries.
+  - `/v1/health` & `/v1/metrics`: server status, uptime, and database metrics.
+- OpenAPI Swagger documentation served at `/docs` with interactive Swagger UI.
+- Seed script `apps/api/scripts/seed.ts` populating Northfield Institute of Technology demo credentials.
+- 48 API integration tests passing across 8 test suites.
+- Backend test line coverage measured: **91.02%** (exceeding target $\ge 85\%$).
+- Entire monorepo passing 212 tests (contracts: 68, core: 86, circuits: 10, api: 48), clean typecheck, and clean lint.
+
+**What is deferred:**
+
+- Mode B in-circuit SMT verification (Phase 9).
+- Production PostgreSQL connection string (switchable via `DATABASE_URL` in `.env`).
+
+**Known issues:**
+
+- None
 
 ---
 

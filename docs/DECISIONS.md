@@ -220,3 +220,49 @@
 2. **Expiration Semantics:** Slot 7 represents expiry UNIX seconds. The circuit allows credentials where `values[7] == 0` (permanent/unexpiring) OR `values[7] >= currentTime`. If `values[7] > 0` and `values[7] < currentTime`, the constraint `(1 - isZero.out) * (1 - ge.out) === 0` strictly rejects.
 3. **Challenge Squaring:** `challengeSquare <== challenge * challenge` binds the verifier's challenge nonce into the R1CS constraint graph, preventing optimization pruning.
 
+---
+
+## D-015: Zero-Dependency SQLite via Prisma ORM for Local Development and Testing
+
+**Context:** Monorepo test suites and local development environments often execute without a running Docker daemon or active PostgreSQL 16 container.
+
+**Alternatives:**
+1. In-memory mock database wrappers.
+2. Mandatory Docker compose PostgreSQL requirement.
+3. Real Prisma relational database with SQLite (`DATABASE_URL="file:./dev.db"`).
+
+**Choice:** Real SQLite database via Prisma ORM for dev and testing, fully compatible with PostgreSQL schema in production.
+
+**Consequence:** Tests run against real relational constraints (foreign keys, cascading updates, unique constraints) with zero external daemon requirements and 100% determinism.
+
+---
+
+## D-016: Replay-Safe SIWE Session Sealing with Database Nonces and HMAC Cookies
+
+**Context:** Institutional issuers and administrative users authenticate via Sign-In with Ethereum (EIP-4361).
+
+**Alternatives:**
+1. JWT tokens stored in localStorage.
+2. In-memory stateful session table.
+3. Database-backed single-use nonces with HMAC-SHA256 sealed `httpOnly` session cookies (`zkdg_session`).
+
+**Choice:** Single-use nonces stored with 5-minute TTL in `SiweNonce`, verified via `viem.verifyMessage()`, issuing HMAC-SHA256 sealed session cookies with 24-hour expiration.
+
+**Consequence:** Immune to XSS token theft (`httpOnly`, `sameSite: strict`), immune to signature replay attacks, and role-enforced (`admin`, `issuer`, `user`).
+
+---
+
+## D-017: Content-Addressed Fallback for IPFS Document Ciphertext Storage
+
+**Context:** The system anchors client-side encrypted document ciphertexts to IPFS. Development machines may operate offline or without an active Kubo daemon.
+
+**Alternatives:**
+1. Fail all upload requests if Kubo HTTP RPC is unreachable.
+2. Generate mock non-cryptographic hashes.
+3. Dual-mode IPFS client with live Kubo RPC attempts falling back to local content-addressed storage (`.ipfs_store`) using standard SHA-256 base58 multihashes (`0x12 0x20 <sha256>`).
+
+**Choice:** Dual-mode IPFS client with deterministic multihash CID generation and database `PinRecord` tracking.
+
+**Consequence:** Ciphertext CIDs are mathematically identical to IPFS Kubo CIDs, allowing seamless offline development, automated testing, and transparent migration to live IPFS nodes.
+
+

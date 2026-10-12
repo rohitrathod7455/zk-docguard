@@ -80,6 +80,7 @@ async function main() {
 
   fs.writeFileSync(fixturePath, JSON.stringify(fixture, null, 2), 'utf8');
   console.log(`✅ Saved proof fixture to ${path.relative(repoRoot, fixturePath)}`);
+  process.exit(0);
 }
 
 main().catch((err) => {
