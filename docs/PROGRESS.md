@@ -443,7 +443,54 @@
 
 ## Phase 10 — Testing, Security Review, Benchmarks
 
-**Status:** 🔲 Not started
+**Status:** ✅ Complete
+
+**What was done:**
+
+- **Property-Based Testing & Cryptographic Invariants (`packages/core/test/property.test.ts`):**
+  - Integrated `fast-check` property-based testing across core cryptographic and tree primitives (6/6 property tests passing across 100+ randomized iterations).
+  - Validated scalar field encoding / hex parsing roundtrips across all boundary elements $[0, r - 1]$.
+  - Validated arbitrary byte streams up to 31 bytes mapping injectively into BN254 scalar field.
+  - Validated lossless AES-256-GCM document encryption/decryption roundtrip across arbitrary byte lengths up to 4 KB.
+  - Validated ephemeral X25519 key-wrapped share decryption within TTL and strict expiration rejection for timestamps $> \text{expiresAt}$.
+  - Validated Merkle inclusion proof deterministic verification for all 8 attribute slots.
+  - Validated Sparse Merkle Tree (SMT) strict membership and non-membership exclusion invariants.
+- **STRIDE Threat Modeling & Security Review (`docs/THREAT_MODEL.md`):**
+  - Formulated comprehensive, production-grade STRIDE security architecture matrix covering assets, trust boundaries, attacker profiles, and residual risks.
+  - Detailed threat scenarios and mitigations for: Forged Issuer (T-S1), Sybil Holder Credential Sharing (T-S2), Public Signal Tampering (T-T2), Verifier Linkage / Correlation (T-I1), Mempool Front-Running, Issuer Key Compromise & Rotation Epochs, Trusted-Setup Toxic Waste, IPFS Availability & Ciphertext Enumeration, and XSS / Session Fixation.
+  - Verified dependency auditing (`pnpm audit --prod`) and vetted cryptographic primitives against `@noble/curves` and `@noble/hashes`.
+- **Comprehensive Benchmarks Suite (`benchmarks/`):**
+  - **Circuit Benchmarks (`benchmarks/results/circuit-benchmarks.json`):**
+    - Mode A (`DiscloseModeA`): 9,144 constraints, 9,146 wires, 26 public signals, $k=14$ Powers of Tau, 5.74 MB zkey, 2.84 MB wasm, 722 bytes proof. Proving time: 774ms desktop (AVX2), ~2,206ms mobile WebWorker; verification time: 12.8ms.
+    - Mode B (`DiscloseModeB` with `SMTVerifier(10)`): 12,933 constraints, 12,935 wires, 26 public signals, $k=14$ Powers of Tau, 7.70 MB zkey, 3.31 MB wasm, 723 bytes proof. Proving time: 635ms desktop, ~1,810ms mobile WebWorker; verification time: 10.8ms.
+  - **On-Chain Gas Consumption Benchmarks (`benchmarks/results/gas-benchmarks.json`):**
+    - Contract Deployments: `IssuerRegistry` (1,508,850 gas), `DocumentRegistry` (1,532,329 gas), `RevocationRegistry` (822,610 gas), `Groth16Verifier` (859,475 gas), `Groth16VerifierModeB` (859,499 gas), `VerifierGateway` (884,141 gas).
+    - Operations: `applyAsIssuer` (209,812 gas), `approveIssuer` (30,707 gas), `rotateKey` (87,736 gas), `revokeCredential` (76,049 gas), `updateRevocationRoot` (80,530 gas).
+    - Batch Anchoring Amortization: Single document registration (192,308 gas) vs Batch 10 (14,529 gas/doc) vs Batch 50 (2,906 gas/doc) vs Batch 100 (1,453 gas/doc). Merkle batching achieves a **99.2% gas reduction**.
+    - Standalone Groth16 Verifications: Mode A (384,621 gas), Mode B (384,645 gas).
+    - Gateway `consumeAndVerify` with anti-replay tracking: Mode A (432,901 gas), Mode B (435,258 gas).
+  - **Sparse Merkle Tree Scaling Benchmarks (`benchmarks/results/smt-benchmarks.json`):**
+    - 1,000 leaves: build time 1,489ms (671 leaves/sec), non-membership witness latency: **0.19 ms**.
+    - 10,000 leaves: build time 14,385ms (695 leaves/sec), non-membership witness latency: **0.14 ms**.
+    - 100,000 leaves: extrapolated build time 161s, non-membership witness latency: **0.16 ms**. Confirmed sub-millisecond logarithmic proof generation across tree scale.
+  - **End-to-End System Workflow Benchmarks (`benchmarks/results/system-benchmarks.json`):**
+    - Total E2E Presentation Latency: **3,217 ms** (Session Create: 22.9ms, Session Fetch: 10ms, SMT Witness Fetch: 694.9ms, Client Groth16 Proving: 1,574.4ms, Presentation Verification: 911.5ms, HMAC Receipt Generation: 3.5ms).
+    - IPFS Payloads: 1 KB (251ms roundtrip), 10 KB (15.3ms roundtrip), 100 KB (15.9ms roundtrip), 500 KB (27.5ms roundtrip).
+    - Ephemeral Sharing Throughput: Keypair gen (0.85ms), Wrap (5.79ms), Unwrap (6.12ms), Total cycle: 12.76ms (**78 shares/sec**).
+  - **Vector Visualization Charts (`benchmarks/results/charts/`):**
+    - Generated standalone SVG charts: `chart-proving-time.svg`, `chart-batch-amortization.svg`, `chart-e2e-timeline.svg`, and `chart-smt-scaling.svg`.
+  - **API Load Testing Script:** Created `benchmarks/src/k6-load-test.js` simulating concurrent virtual users, session creation, and verification queries under peak load.
+- **Verification & Builds:**
+  - 10/10 turbo test tasks passing cleanly.
+  - 7/7 turbo build tasks passing including Next.js production bundle.
+
+**What is deferred:**
+
+- Live deployment to Polygon Amoy testnet, hosted infrastructure, and demo walkthrough script (Phase 11).
+
+**Known issues:**
+
+- None.
 
 ---
 

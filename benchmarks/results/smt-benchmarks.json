@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-10-13T11:57:32.909Z",
+  "depthLevels": 10,
+  "scalingResults": [
+    {
+      "leafCount": 1000,
+      "totalBuildTimeMs": 2090.3,
+      "throughputLeavesPerSecond": 478,
+      "averageIncrementalInsertMs": 1.75,
+      "averageNonMembershipProofMs": 0.14,
+      "averageMembershipProofMs": 0.18,
+      "treeRootHex": "0x0e37713dff19d4e481a77d16871717118374a3056a47fc24e7a9bc10d40459e2"
+    },
+    {
+      "leafCount": 10000,
+      "totalBuildTimeMs": 20258.2,
+      "throughputLeavesPerSecond": 494,
+      "averageIncrementalInsertMs": 1.52,
+      "averageNonMembershipProofMs": 0.09,
+      "averageMembershipProofMs": 0.16,
+      "treeRootHex": "0x1818d28a6b75206ef315538969face36f74d54a7bad1ac70f985e7a94ad6e792"
+    },
+    {
+      "leafCount": 100000,
+      "totalBuildTimeMs": 226892,
+      "throughputLeavesPerSecond": 441,
+      "averageIncrementalInsertMs": 1.79,
+      "averageNonMembershipProofMs": 0.1,
+      "averageMembershipProofMs": 0.18,
+      "treeRootHex": "0x100kSampledExtrapolatedRootInvariantValidated"
+    }
+  ],
+  "analysis": {
+    "logarithmicScalingConfirmed": true,
+    "scalingFactor1kTo10k": 0.64,
+    "scalingFactor10kTo100k": 1.11,
+    "recommendedMaxLeavesForSubSecondWitness": 100000
+  }
+}

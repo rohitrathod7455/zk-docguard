@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-10-13T11:46:59.900Z",
+  "e2ePresentationWorkflow": {
+    "step1_sessionCreationMs": 22.9,
+    "step2_sessionFetchMs": 10,
+    "step3_witnessFetchMs": 694.9,
+    "step4_clientProvingMs": 1574.4,
+    "step5_presentationVerificationMs": 911.5,
+    "step6_receiptGenerationMs": 3.5,
+    "totalE2ELatencyMs": 3217.2
+  },
+  "ipfsPayloadBenchmarks": [
+    {
+      "payloadDescription": "1 KB — Metadata / Claim Assertions",
+      "sizeBytes": 1024,
+      "encryptionTimeMs": 1.77,
+      "uploadLatencyMs": 243.35,
+      "retrievalAndDecryptionMs": 6.73,
+      "totalRoundtripMs": 251.85
+    },
+    {
+      "payloadDescription": "10 KB — Detailed Academic Record (JSON)",
+      "sizeBytes": 10240,
+      "encryptionTimeMs": 0.41,
+      "uploadLatencyMs": 12,
+      "retrievalAndDecryptionMs": 2.95,
+      "totalRoundtripMs": 15.36
+    },
+    {
+      "payloadDescription": "100 KB — High-Resolution Diploma Certificate",
+      "sizeBytes": 102400,
+      "encryptionTimeMs": 0.24,
+      "uploadLatencyMs": 11.47,
+      "retrievalAndDecryptionMs": 4.23,
+      "totalRoundtripMs": 15.94
+    },
+    {
+      "payloadDescription": "500 KB — Full Multipage Transcript Package",
+      "sizeBytes": 512000,
+      "encryptionTimeMs": 0.85,
+      "uploadLatencyMs": 13.61,
+      "retrievalAndDecryptionMs": 13.09,
+      "totalRoundtripMs": 27.55
+    }
+  ],
+  "ephemeralSharingThroughput": {
+    "keypairGenerationMs": 0.85,
+    "keyWrapMs": 5.79,
+    "keyUnwrapMs": 6.12,
+    "totalShareCycleMs": 12.76,
+    "sharesPerSecond": 78
+  }
+}

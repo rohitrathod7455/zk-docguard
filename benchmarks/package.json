@@ -2,14 +2,30 @@
   "name": "@zk-docguard/benchmarks",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "echo \"No build for benchmarks\"",
-    "test": "echo \"Benchmarks — Phase 10\"",
-    "lint": "echo \"No lint for benchmarks yet\"",
-    "typecheck": "echo \"No typecheck for benchmarks yet\"",
+    "test": "tsx src/run-all-benchmarks.ts",
+    "bench:circuit": "tsx src/circuit-benchmarks.ts",
+    "bench:gas": "tsx src/gas-benchmarks.ts",
+    "bench:smt": "tsx src/smt-benchmarks.ts",
+    "bench:system": "tsx src/system-benchmarks.ts",
+    "bench:charts": "tsx src/generate-charts.ts",
+    "bench:all": "tsx src/run-all-benchmarks.ts",
     "clean": "rimraf results"
   },
+  "dependencies": {
+    "@zk-docguard/core": "workspace:*",
+    "@zk-docguard/circuits": "workspace:*",
+    "@zk-docguard/contracts": "workspace:*",
+    "@zk-docguard/api": "workspace:*",
+    "snarkjs": "^0.7.6",
+    "viem": "^2.57.3"
+  },
   "devDependencies": {
-    "rimraf": "^6.0.1"
+    "@types/node": "^22.10.1",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
   }
 }

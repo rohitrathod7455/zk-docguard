@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-10-13T11:44:23.828Z",
+  "evmVersion": "paris",
+  "network": "Hardhat Local / EVM Compatible (Polygon Amoy / Ethereum)",
+  "deployments": {
+    "IssuerRegistry": 1508850,
+    "DocumentRegistry": 1532329,
+    "RevocationRegistry": 822610,
+    "Groth16Verifier": 859475,
+    "Groth16VerifierModeB": 859499,
+    "VerifierGateway": 884141
+  },
+  "operations": {
+    "IssuerRegistry.applyAsIssuer": 209812,
+    "IssuerRegistry.approveIssuer": 30707,
+    "IssuerRegistry.rotateKey": 87736,
+    "DocumentRegistry.registerDocument (single)": 192308,
+    "DocumentRegistry.registerBatch (10 docs)": 145289,
+    "DocumentRegistry.registerBatch (50 docs)": 145289,
+    "DocumentRegistry.registerBatch (100 docs)": 145301,
+    "RevocationRegistry.revokeCredential (Mode A)": 76049,
+    "RevocationRegistry.updateRevocationRoot (Mode B)": 80530,
+    "Groth16Verifier.verifyProof (Mode A standalone)": 384621,
+    "Groth16VerifierModeB.verifyProof (Mode B standalone)": 384645,
+    "VerifierGateway.consumeAndVerify (Mode A)": 432901,
+    "VerifierGateway.consumeAndVerify (Mode B)": 435258
+  },
+  "batchAmortization": {
+    "singleDocumentRegistrationGas": 192308,
+    "batch10": {
+      "totalGas": 145289,
+      "gasPerDoc": 14529
+    },
+    "batch50": {
+      "totalGas": 145289,
+      "gasPerDoc": 2906
+    },
+    "batch100": {
+      "totalGas": 145301,
+      "gasPerDoc": 1453
+    },
+    "amortizationSavingsPercentage100vsSingle": 99.2
+  }
+}

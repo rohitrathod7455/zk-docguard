@@ -10,6 +10,7 @@
     "clean": "hardhat clean && rimraf dist coverage",
     "coverage": "hardhat coverage",
     "export-abi": "hardhat run scripts/export-artifacts.ts",
+    "bench:gas": "hardhat run scripts/gas-benchmark.ts",
     "deploy:hardhat": "hardhat run scripts/deploy.ts --network hardhat",
     "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
     "deploy:amoy": "hardhat run scripts/deploy.ts --network amoy",
