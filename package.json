@@ -12,6 +12,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "demo": "tsx scripts/demo.ts",
+    "seed": "tsx apps/api/scripts/seed.ts",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
@@ -26,6 +28,7 @@
     "eslint": "^9.15.0",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
+    "tsx": "^4.19.2",
     "turbo": "^2.3.3",
     "typescript": "^5.6.3"
   }

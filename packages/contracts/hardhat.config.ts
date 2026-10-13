@@ -59,6 +59,16 @@ const config: HardhatUserConfig = {
       polygonAmoy: POLYGONSCAN_API_KEY,
       sepolia: ETHERSCAN_API_KEY,
     },
+    customChains: [
+      {
+        network: 'polygonAmoy',
+        chainId: 80002,
+        urls: {
+          apiURL: 'https://api-amoy.polygonscan.com/api',
+          browserURL: 'https://amoy.polygonscan.com',
+        },
+      },
+    ],
   },
 };
 

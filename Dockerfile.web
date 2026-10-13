@@ -1,0 +1,35 @@
+# ZK-DocGuard Web App Production Dockerfile
+FROM node:20-bookworm-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+WORKDIR /app
+
+FROM base AS builder
+WORKDIR /app
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
+COPY packages/ ./packages/
+COPY apps/web/ ./apps/web/
+
+RUN pnpm install --frozen-lockfile
+
+# Build core and circuits workspace dependencies
+RUN pnpm --filter @zk-docguard/core build
+
+# Build Next.js PWA production bundle
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN pnpm --filter @zk-docguard/web build
+
+FROM base AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+ENV NEXT_TELEMETRY_DISABLED=1
+
+COPY --from=builder /app /app
+
+EXPOSE 3000
+
+CMD ["pnpm", "--filter", "@zk-docguard/web", "start"]

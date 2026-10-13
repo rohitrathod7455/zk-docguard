@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-13T11:57:07.990Z",
+  "timestamp": "2026-10-13T12:24:34.882Z",
   "hardware": {
     "platform": "win32",
     "arch": "x64",
@@ -21,16 +21,16 @@
         "proofSizeBytes": 724
       },
       "desktopTiming": {
-        "averageWitnessTimeMs": 485.5,
-        "averageProvingTimeMs": 1733.9,
-        "minProvingTimeMs": 1043.5,
-        "maxProvingTimeMs": 2954.8,
-        "averageVerificationTimeMs": 24.4,
+        "averageWitnessTimeMs": 235.5,
+        "averageProvingTimeMs": 841.2,
+        "minProvingTimeMs": 610.6,
+        "maxProvingTimeMs": 1278.5,
+        "averageVerificationTimeMs": 14.7,
         "iterations": 3
       },
       "mobileEstimatedTiming": {
         "targetDevice": "ARM64 Cortex-A78 / Apple A15 Bionic (V8 WebWorker)",
-        "averageProvingTimeMs": 4941.6,
+        "averageProvingTimeMs": 2397.4,
         "scalingFactor": 2.85
       }
     },
@@ -45,19 +45,19 @@
         "zkeySizeBytes": 7696108,
         "wasmSizeBytes": 3308284,
         "vkeySizeBytes": 7492,
-        "proofSizeBytes": 722
+        "proofSizeBytes": 724
       },
       "desktopTiming": {
-        "averageWitnessTimeMs": 491.4,
-        "averageProvingTimeMs": 1694.6,
-        "minProvingTimeMs": 1480.2,
-        "maxProvingTimeMs": 1954.2,
-        "averageVerificationTimeMs": 37.2,
+        "averageWitnessTimeMs": 232.5,
+        "averageProvingTimeMs": 801.7,
+        "minProvingTimeMs": 713.9,
+        "maxProvingTimeMs": 883.6,
+        "averageVerificationTimeMs": 15.3,
         "iterations": 3
       },
       "mobileEstimatedTiming": {
         "targetDevice": "ARM64 Cortex-A78 / Apple A15 Bionic (V8 WebWorker)",
-        "averageProvingTimeMs": 4829.6,
+        "averageProvingTimeMs": 2284.8,
         "scalingFactor": 2.85
       }
     }
@@ -65,7 +65,7 @@
   "comparison": {
     "constraintDelta": 3789,
     "constraintPercentageIncrease": 41.4,
-    "provingTimeDeltaMs": -39.3,
-    "provingTimePercentageIncrease": -2.3
+    "provingTimeDeltaMs": -39.5,
+    "provingTimePercentageIncrease": -4.7
   }
 }

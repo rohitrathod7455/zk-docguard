@@ -1,0 +1,84 @@
+# ZK-DocGuard — Production Docker Compose
+# Orchestrates Postgres, IPFS (Kubo), API Backend, and Next.js Web Frontend.
+# Usage: docker compose -f docker-compose.prod.yml up -d --build
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: zkdg-prod-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zkdocguard
+      POSTGRES_PASSWORD: zkdocguard_secure_password
+      POSTGRES_DB: zkdocguard
+    ports:
+      - '5432:5432'
+    volumes:
+      - prod_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U zkdocguard']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ipfs:
+    image: ipfs/kubo:v0.32.1
+    container_name: zkdg-prod-ipfs
+    restart: unless-stopped
+    ports:
+      - '4001:4001' # Swarm
+      - '5001:5001' # API
+      - '8080:8080' # Gateway
+    volumes:
+      - prod_ipfsdata:/data/ipfs
+    environment:
+      - IPFS_PROFILE=server
+    healthcheck:
+      test: ['CMD-SHELL', 'ipfs id || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: zkdg-prod-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      API_HOST: '0.0.0.0'
+      API_PORT: 3001
+      DATABASE_URL: postgresql://zkdocguard:zkdocguard_secure_password@postgres:5432/zkdocguard
+      IPFS_API_URL: http://ipfs:5001
+      IPFS_GATEWAY_URL: http://ipfs:8080
+      SESSION_SECRET: zk_docguard_production_session_secret_key_minimum_32_characters_12345
+      LOG_LEVEL: info
+    ports:
+      - '3001:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ipfs:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: zkdg-prod-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_CHAIN_ID: 80002
+      NEXT_PUBLIC_IPFS_GATEWAY: http://localhost:8080
+    ports:
+      - '3000:3000'
+    depends_on:
+      - api
+
+volumes:
+  prod_pgdata:
+  prod_ipfsdata:

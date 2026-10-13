@@ -60,6 +60,30 @@ export async function uploadToIpfs(
     // Kubo unreachable, use local content-addressed storage
   }
 
+  // Try Pinata cloud pinning if PINATA_JWT is provided
+  if (process.env.PINATA_JWT) {
+    try {
+      const pinataFormData = new FormData();
+      const pinataBlob = new Blob([Buffer.from(content)], { type: 'application/octet-stream' });
+      pinataFormData.append('file', pinataBlob, `${cid}.enc`);
+      const pinataRes = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.PINATA_JWT}`,
+        },
+        body: pinataFormData,
+      });
+      if (pinataRes.ok) {
+        const pinataJson = (await pinataRes.json()) as { IpfsHash?: string };
+        if (pinataJson.IpfsHash) {
+          cid = pinataJson.IpfsHash;
+        }
+      }
+    } catch {
+      // Pinata offline, proceed with local storage
+    }
+  }
+
   // Store in local content-addressed store
   const filePath = path.resolve(LOCAL_STORE_DIR, cid);
   fs.writeFileSync(filePath, Buffer.from(content));
@@ -82,10 +106,10 @@ export async function uploadToIpfs(
 }
 
 /**
- * @notice Retrieves ciphertext by CID from live Kubo RPC or local content-addressed storage.
+ * @notice Retrieves ciphertext by CID from live Kubo RPC, Pinata gateway, or local store.
  */
 export async function getFromIpfs(cid: string): Promise<Uint8Array | null> {
-  // Try live Kubo first
+  // 1. Try live Kubo first
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 2000);
@@ -99,10 +123,30 @@ export async function getFromIpfs(cid: string): Promise<Uint8Array | null> {
       return new Uint8Array(arrayBuffer);
     }
   } catch {
-    // Kubo unreachable, check local store
+    // Kubo unreachable, try Pinata gateway
   }
 
-  // Fallback to local store
+  // 2. Try Pinata dedicated gateway if configured
+  const pinataGateway = process.env.PINATA_GATEWAY || 'https://gateway.pinata.cloud';
+  if (process.env.PINATA_GATEWAY || process.env.PINATA_JWT) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2500);
+      const res = await fetch(`${pinataGateway}/ipfs/${cid}`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (res.ok) {
+        const arrayBuffer = await res.arrayBuffer();
+        return new Uint8Array(arrayBuffer);
+      }
+    } catch {
+      // Pinata gateway failed, check local store
+    }
+  }
+
+  // 3. Fallback to local store
   const filePath = path.resolve(LOCAL_STORE_DIR, cid);
   if (fs.existsSync(filePath)) {
     const buf = fs.readFileSync(filePath);

@@ -60,7 +60,7 @@ async function main() {
   console.log(`✔ DocumentRegistry deployed to: ${documentRegistryAddress}`);
 
   // 3. Deploy RevocationRegistry
-  console.log('\n[3/3] Deploying RevocationRegistry...');
+  console.log('\n[3/6] Deploying RevocationRegistry...');
   const RevocationRegistryFactory = await ethers.getContractFactory('RevocationRegistry');
   const revocationRegistry = await RevocationRegistryFactory.deploy(
     deployer.address,
@@ -70,13 +70,43 @@ async function main() {
   const revocationRegistryAddress = await revocationRegistry.getAddress();
   console.log(`✔ RevocationRegistry deployed to: ${revocationRegistryAddress}`);
 
+  // 4. Deploy Groth16Verifier (Mode A)
+  console.log('\n[4/6] Deploying Groth16Verifier (Mode A)...');
+  const VerifierAFactory = await ethers.getContractFactory('Groth16Verifier');
+  const verifierModeA = await VerifierAFactory.deploy();
+  await verifierModeA.waitForDeployment();
+  const verifierModeAAddress = await verifierModeA.getAddress();
+  console.log(`✔ Groth16Verifier (Mode A) deployed to: ${verifierModeAAddress}`);
+
+  // 5. Deploy Groth16VerifierModeB (Mode B)
+  console.log('\n[5/6] Deploying Groth16VerifierModeB (Mode B)...');
+  const VerifierBFactory = await ethers.getContractFactory('Groth16VerifierModeB');
+  const verifierModeB = await VerifierBFactory.deploy();
+  await verifierModeB.waitForDeployment();
+  const verifierModeBAddress = await verifierModeB.getAddress();
+  console.log(`✔ Groth16VerifierModeB (Mode B) deployed to: ${verifierModeBAddress}`);
+
+  // 6. Deploy VerifierGateway
+  console.log('\n[6/6] Deploying VerifierGateway...');
+  const GatewayFactory = await ethers.getContractFactory('VerifierGateway');
+  const gateway = await GatewayFactory.deploy(
+    deployer.address,
+    issuerRegistryAddress,
+    revocationRegistryAddress,
+    verifierModeAAddress,
+    verifierModeBAddress,
+  );
+  await gateway.waitForDeployment();
+  const gatewayAddress = await gateway.getAddress();
+  console.log(`✔ VerifierGateway deployed to: ${gatewayAddress}`);
+
   // Save deployment records
   const deploymentsDir = path.join(__dirname, '..', 'deployments');
   if (!fs.existsSync(deploymentsDir)) {
     fs.mkdirSync(deploymentsDir, { recursive: true });
   }
 
-  const record: DeploymentRecord = {
+  const record = {
     network: networkName,
     chainId: Number(chainId),
     deployedAt: new Date().toISOString(),
@@ -93,6 +123,24 @@ async function main() {
       RevocationRegistry: {
         address: revocationRegistryAddress,
         args: [deployer.address, issuerRegistryAddress],
+      },
+      Groth16Verifier: {
+        address: verifierModeAAddress,
+        args: [],
+      },
+      Groth16VerifierModeB: {
+        address: verifierModeBAddress,
+        args: [],
+      },
+      VerifierGateway: {
+        address: gatewayAddress,
+        args: [
+          deployer.address,
+          issuerRegistryAddress,
+          revocationRegistryAddress,
+          verifierModeAAddress,
+          verifierModeBAddress,
+        ],
       },
     },
   };

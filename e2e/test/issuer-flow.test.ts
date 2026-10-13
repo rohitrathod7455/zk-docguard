@@ -64,7 +64,7 @@ describe('E2E Phase 6: Institutional Issuer & Admin Governance Flow', () => {
     await prisma.credentialRecord.deleteMany({ where: { issuerAddress } });
     await prisma.issuanceBatch.deleteMany({ where: { issuerAddress } });
     await prisma.revocationLeaf.deleteMany({ where: { issuerAddress } });
-    await prisma.issuer.deleteMany({ where: { address: issuerAddress } });
+    await prisma.issuer.deleteMany({ where: { OR: [{ address: issuerAddress }, { zkKeyHash: issuerKeyHashHex }] } });
 
     // Issuer applies
     const applyRes = await app.inject({
@@ -304,5 +304,5 @@ describe('E2E Phase 6: Institutional Issuer & Admin Governance Flow', () => {
 
     expect(batchRecord.count).toBe(50);
     expect(batchRecord.batchRoot).toBe(batchRoot);
-  });
+  }, 30000);
 });

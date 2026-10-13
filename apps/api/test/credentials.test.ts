@@ -135,8 +135,9 @@ describe('API Credentials and Verify Routes (/v1/credentials, /v1/verify)', () =
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.body);
     expect(body.total).toBeGreaterThanOrEqual(1);
-    expect(body.records[0].docHash).toBe(docHash);
-    expect(body.records[0].status).toBe('Valid');
+    const found = body.records.find((r: { docHash: string }) => r.docHash === docHash);
+    expect(found).toBeDefined();
+    expect(found?.status).toBe('Valid');
   });
 });
 

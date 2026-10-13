@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "echo \"No build for e2e\"",
-    "test": "vitest run",
+    "test": "vitest run --fileParallelism=false",
     "lint": "echo \"Clean e2e lint\"",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist test-results"
