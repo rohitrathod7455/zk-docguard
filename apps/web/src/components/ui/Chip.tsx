@@ -7,6 +7,7 @@ import { useToast } from './Toast';
 export interface ChipProps {
   value?: string;
   label?: string;
+  children?: React.ReactNode;
   variant?: string;
   prefixLength?: number;
   suffixLength?: number;
@@ -18,6 +19,7 @@ export interface ChipProps {
 export function Chip({
   value,
   label,
+  children,
   variant: _variant,
   prefixLength = 6,
   suffixLength = 4,
@@ -25,7 +27,7 @@ export function Chip({
   href,
   isMono = true,
 }: ChipProps) {
-  const displayVal = value ?? label ?? '';
+  const displayVal = typeof children === 'string' ? children : (value ?? label ?? (children ? String(children) : ''));
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 

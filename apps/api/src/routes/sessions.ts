@@ -50,7 +50,15 @@ export async function sessionRoutes(app: FastifyInstance): Promise<void> {
       const challengeBI = await poseidonHash([nonceField, domainHash]);
       const challenge = challengeBI.toString();
 
-      const expiresAt = new Date(Date.now() + SESSION_EXPIRY_MS);
+      const reqData = parsed.data.request as Record<string, unknown>;
+      let validityMs = SESSION_EXPIRY_MS;
+      if (typeof reqData.validityWindowMinutes === 'number') {
+        validityMs = reqData.validityWindowMinutes * 60 * 1000;
+      } else if (typeof reqData.validityWindowSeconds === 'number') {
+        validityMs = reqData.validityWindowSeconds * 1000;
+      }
+
+      const expiresAt = new Date(Date.now() + validityMs);
       const sessionId = crypto.randomUUID();
 
       const qrPayload = JSON.stringify({
@@ -110,6 +118,15 @@ export async function sessionRoutes(app: FastifyInstance): Promise<void> {
         return reply.status(404).send({ error: 'Verification session not found' });
       }
 
+      let currentStatus = session.status;
+      if (currentStatus === 'PENDING' && new Date() > session.expiresAt) {
+        currentStatus = 'EXPIRED';
+        await prisma.verificationSession.update({
+          where: { id: req.params.id },
+          data: { status: 'EXPIRED' },
+        });
+      }
+
       return reply.send({
         sessionId: session.id,
         verifierName: session.verifierName,
@@ -117,9 +134,74 @@ export async function sessionRoutes(app: FastifyInstance): Promise<void> {
         challenge: session.challenge,
         nonce: session.nonce,
         request: JSON.parse(session.requestJson),
-        status: session.status,
+        status: currentStatus,
         expiresAt: session.expiresAt.toISOString(),
+        createdAt: session.createdAt.toISOString(),
         result: session.resultJson ? JSON.parse(session.resultJson) : null,
+        receiptSig: session.receiptSig,
+      });
+    },
+  );
+
+  // 2b. List verification sessions for verifier history
+  app.get(
+    '/v1/sessions',
+    {
+      schema: {
+        description: 'List verification request sessions with optional status and domain filtering',
+        tags: ['Verification'],
+        querystring: {
+          type: 'object',
+          properties: {
+            domain: { type: 'string' },
+            status: { type: 'string' },
+            limit: { type: 'integer', default: 50 },
+            offset: { type: 'integer', default: 0 },
+          },
+        },
+      },
+    },
+    async (
+      req: FastifyRequest<{
+        Querystring: { domain?: string; status?: string; limit?: number; offset?: number };
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const { domain, status, limit = 50, offset = 0 } = req.query;
+
+      const where: { domain?: string; status?: string } = {};
+      if (domain) where.domain = domain;
+      if (status) where.status = status;
+
+      const [sessions, total] = await Promise.all([
+        prisma.verificationSession.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          take: limit,
+          skip: offset,
+        }),
+        prisma.verificationSession.count({ where }),
+      ]);
+
+      const now = new Date();
+      return reply.send({
+        total,
+        sessions: sessions.map((s) => {
+          const isExpired = s.status === 'PENDING' && now > s.expiresAt;
+          return {
+            sessionId: s.id,
+            verifierName: s.verifierName,
+            domain: s.domain,
+            challenge: s.challenge,
+            nonce: s.nonce,
+            status: isExpired ? 'EXPIRED' : s.status,
+            expiresAt: s.expiresAt.toISOString(),
+            createdAt: s.createdAt.toISOString(),
+            request: JSON.parse(s.requestJson),
+            result: s.resultJson ? JSON.parse(s.resultJson) : null,
+            receiptSig: s.receiptSig,
+          };
+        }),
       });
     },
   );

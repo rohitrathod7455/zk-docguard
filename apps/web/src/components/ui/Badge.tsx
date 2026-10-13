@@ -9,9 +9,11 @@ export interface BadgeProps {
   children: ReactNode;
   icon?: ReactNode;
   size?: 'sm' | 'md';
+  style?: React.CSSProperties;
+  className?: string;
 }
 
-export function Badge({ variant = 'neutral', children, icon, size = 'md' }: BadgeProps) {
+export function Badge({ variant = 'neutral', children, icon, size = 'md', style, className }: BadgeProps) {
   let background = 'var(--bg-surface-muted)';
   let color = 'var(--text-secondary)';
   let border = 'var(--border-default)';
@@ -38,6 +40,7 @@ export function Badge({ variant = 'neutral', children, icon, size = 'md' }: Badg
 
   return (
     <span
+      className={className}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -53,6 +56,7 @@ export function Badge({ variant = 'neutral', children, icon, size = 'md' }: Badg
         border: `1px solid ${border}`,
         whiteSpace: 'nowrap',
         userSelect: 'none',
+        ...style,
       }}
     >
       {icon}

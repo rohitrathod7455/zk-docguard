@@ -11,6 +11,7 @@ export interface IssuerRecord {
   zkKeyHash: string;
   metadataURI: string;
   status: 'Pending' | 'Active' | 'Suspended' | 'Revoked';
+  name?: string;
   registeredAt: string;
   keyEpoch: number;
   approvedAt?: string | null;
@@ -271,6 +272,18 @@ export async function getCiphertextFromIpfs(cid: string): Promise<{ ciphertext: 
   return { ciphertext: base64, size: bytes.byteLength };
 }
 
+export async function getCredentialByDocHash(docHash: string): Promise<{ ok: boolean; record?: CredentialRecordDto; error?: string }> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/v1/credentials/by-doc-hash/${docHash}`);
+    if (res.status === 404) return { ok: false, error: 'Document hash not found in registry' };
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return { ok: true, record: data };
+  } catch (err: unknown) {
+    return { ok: false, error: (err as Error).message };
+  }
+}
+
 export const api = {
   issuers: {
     getAll: getIssuers,
@@ -278,6 +291,7 @@ export const api = {
   },
   credentials: {
     getAll: getCredentials,
+    getByDocHash: getCredentialByDocHash,
     anchor: recordCredentialAnchor,
   },
   revocations: {
@@ -312,6 +326,17 @@ export const api = {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       return { session: data };
+    },
+    async getAll(params?: { domain?: string; status?: string; limit?: number; offset?: number }) {
+      const url = new URL(`${API_BASE_URL}/v1/sessions`);
+      if (params?.domain) url.searchParams.set('domain', params.domain);
+      if (params?.status) url.searchParams.set('status', params.status);
+      if (params?.limit) url.searchParams.set('limit', params.limit.toString());
+      if (params?.offset) url.searchParams.set('offset', params.offset.toString());
+
+      const res = await fetch(url.toString());
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
     },
     async submitPresentation(
       id: string,

@@ -334,7 +334,60 @@
 
 ## Phase 8 — Verifier and Public Verification
 
-**Status:** 🔲 Not started
+**Status:** ✅ Complete
+
+**What was done:**
+
+- **Verifier Request Builder (`apps/web/src/app/verifier/page.tsx`):**
+  - Granular policy configuration: 4 pre-built verification policy presets (Employment Background Check, Graduate Admissions, Academic Honors, Public Registry Lookup).
+  - Custom predicate builder supporting inequality range proofs (CGPA $\ge$, Graduation Year $\ge$), degree code, and program code filters.
+  - Granular attribute disclosure toggles allowing the verifier to specify required revealed fields vs zero-knowledge proved fields.
+  - Trusted issuer whitelist selection with quick presets (Northfield Institute of Technology, Cambridge, MIT, Stanford, ETH Zurich) and custom DID inputs.
+  - Configurable challenge session TTL (1 to 60 minutes) and automated session pairing QR code generation via `POST /v1/sessions`.
+- **Live Verification Portal with Server-Sent Events (`apps/web/src/app/verifier/session/[id]/page.tsx`):**
+  - Live pairing QR screen with high-contrast SVG rendering and one-click challenge URL copying.
+  - Real-time Server-Sent Events (SSE) stream (`/v1/sessions/:id/events`) listening for status transitions: `PENDING` -> `VERIFYING` -> `VERIFIED` / `REJECTED` / `EXPIRED`.
+  - Live visual countdown timer with auto-expiration detection and expired state rendering.
+  - Interactive result sheet displaying verified claims, ZK circuit metadata, and embedded verification receipt.
+- **Tamper-Proof Verification Receipt (`apps/web/src/app/verifier/receipt/[id]/page.tsx`, `apps/web/src/components/verification/VerificationReceipt.tsx`):**
+  - Standalone printable and shareable certificate with archival double-border frame (`@media print` stylesheet).
+  - Cryptographic HMAC-SHA256 signature calculated over `sessionId`, `status`, and verification details.
+  - Verified claims breakdown table, ZK proof protocol specifications (Groth16 on BN254), issuer reputation status, and one-click JSON receipt download (`.json` export).
+- **Public Document Verification Portal (`apps/web/src/app/verify/page.tsx`):**
+  - Drag-and-drop file upload interface with zero server upload (document bytes never leave the client).
+  - Client-side WebCrypto SHA-256 calculation (`crypto.subtle.digest('SHA-256')`).
+  - Instant on-chain registry lookup via `GET /v1/credentials/by-doc-hash/:docHash` and `POST /v1/verify/document`.
+  - Comprehensive status resolution (`Valid`, `Revoked`, `Expired`, `IssuerSuspended`, `Unknown`) with detailed issuer metadata, on-chain transaction hash link, IPFS CID link, and direct bridge to ZK selective disclosure presentation.
+- **Verifier Audit History & Session Log (`apps/web/src/app/verifier/history/page.tsx`):**
+  - Filterable audit history table by domain and status (`ALL`, `VERIFIED`, `REJECTED`, `EXPIRED`, `PENDING`).
+  - Inspection dialog displaying session challenge, verified claims, and link to standalone receipt.
+- **Educational Overview Page (`apps/web/src/app/how-it-works/page.tsx`):**
+  - Comprehensive 4-pillar architectural walkthrough: Self-Sovereign Identity, Zero-Knowledge Groth16 Proofs, On-Chain Revocation Registry, and Client-Side Encrypted Storage.
+- **Backend Predicate Enforcement & Verification Engine (`apps/api/src/services/verification.ts`, `apps/api/src/routes/sessions.ts`):**
+  - Circuit public signal predicate verification: cross-checks `request.requiredPredicates` against `publicSignals[17..24]` and returns `PREDICATE_NOT_SATISFIED` when holder proof fails to satisfy verifier threshold.
+  - Added customizable validity window handling (`validityWindowSeconds`), automated session expiration status resolution, and `GET /v1/sessions` history query endpoint.
+- **End-to-End Integration Test Suite (`e2e/test/verifier-flow.test.ts`):**
+  - Verified all Phase 8 exit criteria across 6 automated tests:
+    1. Full live verification scenario (request -> scan -> prove -> verified with measured latency: Proving ~1.2s - 2.8s, Total E2E Cycle ~1.4s - 2.9s).
+    2. Negative case: expired session fails presentation with `SESSION_EXPIRED`.
+    3. Negative case: untrusted issuer rejected with `UNTRUSTED_ISSUER`.
+    4. Negative case: unmet predicate requirement rejected with `PREDICATE_NOT_SATISFIED`.
+    5. Public document verification (client-side SHA-256 + registry lookup, 404 for tampered document).
+    6. Verifier history log listing past sessions with audit details and status.
+- **Verification & Builds:**
+  - 237 total unit, circuit, contract, integration, and E2E tests passing 100% across the monorepo (19/19 E2E tests).
+  - Clean TypeScript typecheck (`pnpm typecheck`) with 0 errors across all 8 packages.
+  - Clean ESLint and Solhint (`pnpm lint`) with 0 errors.
+  - Next.js production build (`next build`) generating all 23 routes statically and dynamically without errors.
+
+**What is deferred:**
+
+- Mode B in-circuit sparse Merkle tree non-revocation proof (Phase 9).
+- Privacy-preserving revocation registry and selective sharing gateway (Phase 9).
+
+**Known issues:**
+
+- None.
 
 ---
 

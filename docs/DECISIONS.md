@@ -324,3 +324,23 @@
 
 **Consequence:** High-performance, uncompromised holder privacy, zero-leakage selective disclosure, and responsive user experience even on mid-tier hardware.
 
+---
+
+## D-021: Dual-Role Live Verifier Experience, SSE Real-Time Streaming, and Public Hash Registry Lookup
+
+**Context:** Phase 8 requires a complete verifier portal where verifying institutions can specify requirements (claims, predicates, trusted issuers), display pairing QR codes, receive real-time presentation proof submissions without polling, issue tamper-proof verifiable receipts, and provide a public document verification interface for non-ZK hash lookups.
+
+**Alternatives:**
+1. Short-polling API client for session state updates (`GET /v1/sessions/:id` every 1000ms).
+2. Heavy bidirectional WebSockets infrastructure requiring custom reconnect logic and connection state management.
+3. Server-Sent Events (SSE) stream (`/v1/sessions/:id/events`) with standard HTTP EventSource for live status streaming (`PENDING` -> `VERIFYING` -> `VERIFIED` / `REJECTED` / `EXPIRED`), paired with client-side WebCrypto SHA-256 for public registry lookups and HMAC-SHA256 receipt signing.
+
+**Choice:** Choice 3 — Server-Sent Events (SSE) live streaming with client-side WebCrypto hashing and HMAC receipts:
+- **Real-Time Verification Streaming (SSE):** Verifier UI subscribes to `/v1/sessions/:id/events`. When the holder submits a Groth16 presentation from their wallet (`/wallet/present`), the backend event bus immediately pushes status changes and verified claims to the verifier's live QR screen.
+- **Circuit Public Signal Predicate Enforcement:** The verification engine validates that the holder's Groth16 proof satisfies the verifier's requested predicates (`request.requiredPredicates`). If the holder proves a lower threshold (e.g. GPA $\ge 3.00$) than the verifier demands (GPA $\ge 3.90$), the session is rejected with `PREDICATE_NOT_SATISFIED`.
+- **Public In-Browser Document Hash Lookup:** For users holding a physical or PDF credential without an SSI wallet, the public `/verify` portal computes a SHA-256 digest in-browser via WebCrypto API. The file is never transmitted to the server. The hash is queried against on-chain indexed records (`GET /v1/credentials/by-doc-hash/:hash`), displaying validity, revocation status, issuer credentials, and an optional bridge to zero-knowledge presentation.
+- **Tamper-Proof Verification Receipts:** Completed verification sessions yield an HMAC-SHA256 signed verification receipt (`/verifier/receipt/:id`) featuring an archival double-border certificate design, verified claim details, Groth16 proof protocol parameters, and print stylesheet optimization.
+
+**Consequence:** Instantaneous zero-latency verification feedback for verifiers, strict cryptographic predicate validation, zero document privacy leaks, and an institutional archival aesthetic compliant with Section 9 Banned Patterns.
+
+

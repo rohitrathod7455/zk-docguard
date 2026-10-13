@@ -197,6 +197,21 @@ export async function verifyPresentationSubmission(
     }
   }
 
+  if (request.requiredPredicates && request.requiredPredicates.length > 0) {
+    for (const reqPred of request.requiredPredicates) {
+      const match = satisfiedPreds.find(
+        (sp) => sp.index === reqPred.index && BigInt(sp.threshold) >= BigInt(reqPred.minThreshold),
+      );
+      if (!match) {
+        return {
+          success: false,
+          reasonCode: 'PREDICATE_NOT_SATISFIED',
+          error: `Required predicate for attribute slot ${reqPred.index} with minimum threshold ${reqPred.minThreshold} was not satisfied`,
+        };
+      }
+    }
+  }
+
   // 8. Sign verification receipt
   const verifiedAt = new Date().toISOString();
   const receiptData = {
