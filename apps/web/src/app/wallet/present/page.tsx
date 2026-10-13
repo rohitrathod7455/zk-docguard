@@ -54,6 +54,7 @@ function PresentStudioContent() {
     verifierName: string;
     domain: string;
     challenge: string;
+    mode?: 'MODE_A' | 'MODE_B';
     requestedClaims?: {
       revealMask?: boolean[];
       predicates?: Array<{ index: number; threshold: number | string }>;
@@ -108,7 +109,14 @@ function PresentStudioContent() {
         verifierName: res.session.verifierName,
         domain: res.session.domain,
         challenge: res.session.challenge,
-        requestedClaims: requestJson.requestedClaims,
+        mode: requestJson.mode || 'MODE_A',
+        requestedClaims: requestJson.requestedClaims || {
+          revealMask: requestJson.revealMask,
+          predicates: requestJson.requiredPredicates?.map((p: { index: number; minThreshold: number }) => ({
+            index: p.index,
+            threshold: p.minThreshold,
+          })),
+        },
       });
 
       setCurrentStep(1); // Proceed to credential selection
@@ -233,11 +241,26 @@ function PresentStudioContent() {
         threshold: BigInt(p.threshold),
       }));
 
+      const isModeB = sessionDetails.mode === 'MODE_B';
+      let smtWitness = undefined;
+
+      if (isModeB) {
+        setProvingMessage('Fetching Sparse Merkle Tree non-membership witness from issuer tree...');
+        const issuerKeyHash = String(
+          (selectedCred.pkg.vc.proof as unknown as { issuerKeyHash?: string }).issuerKeyHash ||
+          selectedCred.pkg.vc.proof.credentialRoot
+        );
+        const witRes = await api.revocations.getWitness(issuerKeyHash, selectedCred.id);
+        smtWitness = witRes.witness;
+      }
+
       // Generate Groth16 selective disclosure proof via Web Worker
       const presentation = await generatePresentationProof({
         credPkg: selectedCred.pkg,
         holderSecret,
         issuerPublicKey,
+        mode: isModeB ? 'MODE_B' : 'MODE_A',
+        smtWitness,
         query: {
           revealMask: mask,
           predicates,
@@ -256,7 +279,10 @@ function PresentStudioContent() {
       // Submit to API
       const subRes = await api.sessions.submitPresentation(
         sessionDetails.id,
-        presentation
+        {
+          mode: isModeB ? 'MODE_B' : 'MODE_A',
+          proof: presentation.proof,
+        }
       );
 
       // Record activity

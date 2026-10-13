@@ -13,6 +13,8 @@ import {
   Upload,
   Eye,
   Sparkles,
+  Share2,
+  Clock,
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -36,7 +38,7 @@ import {
 import { decryptStoredDocument } from '../../lib/prover';
 import { resolveIssuerPublicKey } from '../../lib/keys';
 import { api } from '../../lib/api-client';
-import { CredentialPackage, verifyUniversityDegreeCredential } from '@zk-docguard/core';
+import { CredentialPackage, verifyUniversityDegreeCredential, createVerifierEphemeralShare } from '@zk-docguard/core';
 
 export default function WalletPage() {
   const { showToast } = useToast();
@@ -59,6 +61,15 @@ export default function WalletPage() {
   // Document decryption modal
   const [decryptedDocText, setDecryptedDocText] = useState<string | null>(null);
   const [decrypting, setDecrypting] = useState(false);
+
+  // Ephemeral document sharing modal
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareVerifierName, setShareVerifierName] = useState('Consulate Verification');
+  const [shareVerifierPubkey, setShareVerifierPubkey] = useState('');
+  const [shareTtl, setShareTtl] = useState('900');
+  const [shareLinkResult, setShareLinkResult] = useState<string | null>(null);
+  const [shareLoading, setShareLoading] = useState(false);
+  const [copiedShareLink, setCopiedShareLink] = useState(false);
 
   useEffect(() => {
     const exists = hasStoredVault();
@@ -193,6 +204,44 @@ export default function WalletPage() {
       showToast(err instanceof Error ? err.message : 'Decryption failed', 'error');
     } finally {
       setDecrypting(false);
+    }
+  };
+
+  const handleCreateShare = async () => {
+    if (!selectedCred) {
+      showToast('No credential selected', 'error');
+      return;
+    }
+    const cleanPubkey = shareVerifierPubkey.trim().replace(/^0x/, '');
+    if (cleanPubkey.length !== 64) {
+      showToast('Verifier ephemeral public key must be 64 hex characters (32 bytes)', 'error');
+      return;
+    }
+    setShareLoading(true);
+    try {
+      const rawHex = selectedCred.documentKeyHex || '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+      const cleanKey = rawHex.replace(/^0x/, '');
+      const docKeyBytes = new Uint8Array(cleanKey.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
+      const verifierPubBytes = new Uint8Array(cleanPubkey.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
+      const ttl = parseInt(shareTtl, 10) || 900;
+
+      const wrappedShare = await createVerifierEphemeralShare(docKeyBytes, verifierPubBytes, ttl);
+      const cid = String(selectedCred.pkg.vc.credentialSubject.documentCID || 'bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi');
+
+      const linkRes = await api.sharing.createLink({
+        cid,
+        verifierPublicKey: cleanPubkey,
+        verifierName: shareVerifierName.trim() || 'Direct Verifier',
+        ttlSeconds: ttl,
+      });
+
+      await api.sharing.fulfillLink(linkRes.linkId, wrappedShare as unknown as Record<string, unknown>);
+      setShareLinkResult(linkRes.linkId);
+      showToast('Ephemeral document share package created and fulfilled!', 'success');
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Failed to create share package', 'error');
+    } finally {
+      setShareLoading(false);
     }
   };
 
@@ -559,19 +608,32 @@ export default function WalletPage() {
                   </pre>
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
                   <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                    The document ciphertext is securely stored on IPFS. Decrypt it in your browser using AES-256-GCM.
+                    Document ciphertext stored on IPFS. Decrypt locally or generate a time-limited ephemeral share for a verifier.
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    loading={decrypting}
-                    onClick={() => handleDecryptDocument(selectedCred)}
-                  >
-                    <Lock size={14} />
-                    Decrypt Attachment
-                  </Button>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      loading={decrypting}
+                      onClick={() => handleDecryptDocument(selectedCred)}
+                    >
+                      <Lock size={14} />
+                      Decrypt Attachment
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setShareModalOpen(true);
+                        setShareLinkResult(null);
+                      }}
+                    >
+                      <Share2 size={14} />
+                      Share Ephemeral Copy
+                    </Button>
+                  </div>
                 </div>
               )}
             </Card>
@@ -606,6 +668,107 @@ export default function WalletPage() {
           </div>
         </Dialog>
       )}
+
+      {/* Ephemeral Document Sharing Modal */}
+      <Dialog
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        title="Verifier-Scoped Ephemeral Document Share"
+        maxWidth="600px"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+            Re-encrypts the document key specifically for the verifier&apos;s ephemeral X25519 public key.
+            The sharing package expires automatically after the specified time-to-live.
+          </p>
+
+          <Input
+            label="Verifier / Institution Name"
+            placeholder="e.g. Consulate Visa Division"
+            value={shareVerifierName}
+            onChange={(e) => setShareVerifierName(e.target.value)}
+          />
+
+          <Input
+            label="Verifier Ephemeral X25519 Public Key (64-char Hex)"
+            placeholder="e.g. aabbcc... 32 bytes hex"
+            value={shareVerifierPubkey}
+            onChange={(e) => setShareVerifierPubkey(e.target.value)}
+            helperText="Provided by verifier or generated in Verifier Request Studio"
+            required
+          />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+              Expiration Time-To-Live (TTL)
+            </label>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {[
+                { label: '15 Minutes', val: '900' },
+                { label: '1 Hour', val: '3600' },
+                { label: '24 Hours', val: '86400' },
+              ].map((opt) => (
+                <Button
+                  key={opt.val}
+                  type="button"
+                  variant={shareTtl === opt.val ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={() => setShareTtl(opt.val)}
+                >
+                  <Clock size={14} />
+                  {opt.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {shareLinkResult && (
+            <div
+              style={{
+                padding: '1rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--bg-surface-elevated)',
+                border: '1px solid var(--border-subtle)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-success)' }}>
+                  Share Package Activated
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(shareLinkResult);
+                    setCopiedShareLink(true);
+                    setTimeout(() => setCopiedShareLink(false), 2000);
+                  }}
+                >
+                  {copiedShareLink ? <Check size={14} /> : <Copy size={14} />}
+                  {copiedShareLink ? 'Copied' : 'Copy Share ID'}
+                </Button>
+              </div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', wordBreak: 'break-all', color: 'var(--text-secondary)' }}>
+                {shareLinkResult}
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <Button variant="outline" onClick={() => setShareModalOpen(false)}>
+              Close
+            </Button>
+            <Button
+              variant="primary"
+              loading={shareLoading}
+              onClick={handleCreateShare}
+            >
+              <Share2 size={16} />
+              Re-wrap & Activate Share
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }

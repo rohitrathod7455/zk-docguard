@@ -61,7 +61,7 @@ async function main() {
   const inputs = await generateCircuitInputs(credPkg, holderSecret, issuerKeyPair.publicKey, {
     revealMask: [false, false, true, false, true, false, false, false], // reveal Degree & GradYear
     predicates: [{ index: 5, threshold: 800 }], // CGPA >= 800
-    currentTime: 1770000000,
+    currentTime: 2000000000,
     challenge: 98765432123456789n,
   });
 

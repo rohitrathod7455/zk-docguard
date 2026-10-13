@@ -104,3 +104,15 @@ model SiweNonce {
   createdAt DateTime @default(now())
   expiresAt DateTime
 }
+
+model DocumentShareLink {
+  id                String   @id @default(uuid())
+  cid               String   // Ciphertext CID
+  verifierPublicKey String   // 32-byte hex X25519 public key of verifier
+  verifierName      String
+  expiresAt         DateTime
+  fulfilled         Boolean  @default(false)
+  wrappedKey        String?  // JSON string of WrappedKeyPackage when fulfilled by holder
+  createdAt         DateTime @default(now())
+}
+

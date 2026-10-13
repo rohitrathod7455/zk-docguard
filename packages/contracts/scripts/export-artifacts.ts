@@ -12,7 +12,7 @@ async function exportArtifacts() {
     fs.mkdirSync(targetDir, { recursive: true });
   }
 
-  const contracts = ['IssuerRegistry', 'DocumentRegistry', 'RevocationRegistry'];
+  const contracts = ['IssuerRegistry', 'DocumentRegistry', 'RevocationRegistry', 'VerifierGateway'];
 
   for (const name of contracts) {
     const artifactPath = path.join(artifactsDir, `${name}.sol`, `${name}.json`);
@@ -36,6 +36,7 @@ async function exportArtifacts() {
 export { default as IssuerRegistryArtifact } from './IssuerRegistry.json';
 export { default as DocumentRegistryArtifact } from './DocumentRegistry.json';
 export { default as RevocationRegistryArtifact } from './RevocationRegistry.json';
+export { default as VerifierGatewayArtifact } from './VerifierGateway.json';
 `;
   fs.writeFileSync(path.join(targetDir, 'index.ts'), indexContent);
   console.log(`Generated contract export index at ${path.join(targetDir, 'index.ts')}`);

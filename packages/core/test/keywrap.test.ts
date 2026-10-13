@@ -3,6 +3,8 @@ import {
   generateX25519KeyPair,
   wrapDocumentKey,
   unwrapDocumentKey,
+  createVerifierEphemeralShare,
+  decryptVerifierEphemeralShare,
 } from '../src/crypto/keywrap.js';
 import { generateAESKey } from '../src/crypto/encryption.js';
 
@@ -83,5 +85,18 @@ describe('X25519 + HKDF Key Wrapping (keywrap.ts)', () => {
     await expect(wrapDocumentKey(new Uint8Array(32), new Uint8Array(16))).rejects.toThrow(
       'Recipient public key must be 32 bytes',
     );
+  });
+
+  it('creates and decrypts verifier-scoped ephemeral shares with TTL', async () => {
+    const docKey = generateAESKey();
+    const verifier = generateX25519KeyPair();
+
+    // 15 minute TTL
+    const sharePkg = await createVerifierEphemeralShare(docKey, verifier.publicKey, 900);
+    expect(sharePkg.expiresAt).toBeDefined();
+    expect(sharePkg.expiresAt!).toBeGreaterThan(Math.floor(Date.now() / 1000));
+
+    const unwrapped = await decryptVerifierEphemeralShare(sharePkg, verifier.privateKey);
+    expect(unwrapped).toEqual(docKey);
   });
 });

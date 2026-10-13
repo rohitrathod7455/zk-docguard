@@ -126,17 +126,26 @@ export async function revocationRoutes(app: FastifyInstance): Promise<void> {
         return reply.status(409).send({ error: 'Credential is revoked (cannot generate non-membership proof)' });
       }
 
-      const witness = await smt.getNonMembershipProof(targetId);
+      const SMT_N_LEVELS = 10;
+      const witness = await smt.getNonMembershipProof(targetId, SMT_N_LEVELS);
+
+      const rootHex = '0x' + smt.getRoot().toString(16).padStart(64, '0');
+      // Pad siblings to SMT_N_LEVELS for circuit compatibility
+      const paddedSiblings = witness.siblings.map((s) => s.toString());
+      while (paddedSiblings.length < SMT_N_LEVELS) {
+        paddedSiblings.push('0');
+      }
 
       return reply.send({
         issuerKeyHash,
         credentialId,
-        root: '0x' + smt.getRoot().toString(16).padStart(64, '0'),
+        root: rootHex,
         witness: {
+          root: rootHex,
           oldKey: witness.oldKey.toString(),
           oldValue: witness.oldValue.toString(),
           isOld0: witness.isOld0,
-          siblings: witness.siblings.map((s) => s.toString()),
+          siblings: paddedSiblings,
         },
       });
     },

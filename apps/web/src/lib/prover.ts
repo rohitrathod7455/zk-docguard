@@ -13,8 +13,10 @@ import {
 } from '@zk-docguard/core';
 import {
   generateCircuitInputs,
+  generateCircuitInputsModeB,
   PresentationQuery,
   CircuitInputs,
+  SMTWitnessInput,
 } from '@zk-docguard/circuits';
 
 // @ts-expect-error snarkjs untyped import
@@ -71,12 +73,12 @@ export interface ProvingProgressCallback {
  * or falling back gracefully to direct async execution in SSR/tests.
  */
 async function runProver(
-  inputs: CircuitInputs,
+  inputs: CircuitInputs | Record<string, unknown>,
   wasmPathOrUrl: string,
   zkeyPathOrUrl: string,
   onProgress?: ProvingProgressCallback
 ): Promise<{ proof: Record<string, unknown>; publicSignals: string[]; durationMs: number; workerOffThread: boolean }> {
-  // If in a browser that supports Web Workers, use off-thread proving
+  // If in a browser that supports Web Worker, use off-thread proving
   if (typeof window !== 'undefined' && typeof Worker !== 'undefined') {
     return new Promise((resolve, reject) => {
       try {
@@ -128,7 +130,7 @@ async function runProver(
  * Direct async prover on current thread
  */
 async function directProve(
-  inputs: CircuitInputs,
+  inputs: CircuitInputs | Record<string, unknown>,
   wasmPathOrUrl: string,
   zkeyPathOrUrl: string,
   onProgress?: ProvingProgressCallback
@@ -158,7 +160,13 @@ async function directProve(
 /**
  * Resolves browser asset URLs for circuit artifacts
  */
-export function getCircuitAssetPaths(): { wasmUrl: string; zkeyUrl: string } {
+export function getCircuitAssetPaths(mode: 'MODE_A' | 'MODE_B' = 'MODE_A'): { wasmUrl: string; zkeyUrl: string } {
+  if (mode === 'MODE_B') {
+    return {
+      wasmUrl: '/zk/disclose_mode_b.wasm',
+      zkeyUrl: '/zk/disclose_mode_b_final.zkey',
+    };
+  }
   return {
     wasmUrl: '/zk/disclose.wasm',
     zkeyUrl: '/zk/disclose_final.zkey',
@@ -173,6 +181,8 @@ export async function generatePresentationProof(options: {
   holderSecret: bigint | string;
   issuerPublicKey: { x: bigint; y: bigint };
   query: PresentationQuery;
+  mode?: 'MODE_A' | 'MODE_B';
+  smtWitness?: SMTWitnessInput;
   verifierDomain?: string;
   onProgress?: ProvingProgressCallback;
   overrideAssetPaths?: { wasm: string; zkey: string };
@@ -182,6 +192,8 @@ export async function generatePresentationProof(options: {
     holderSecret,
     issuerPublicKey,
     query,
+    mode = 'MODE_A',
+    smtWitness,
     verifierDomain,
     onProgress,
     overrideAssetPaths,
@@ -189,18 +201,27 @@ export async function generatePresentationProof(options: {
 
   onProgress?.(10, 'Preparing selective disclosure query and constraints...');
 
-  // 1. Generate circuit inputs
-  const inputs = await generateCircuitInputs(
-    credPkg,
-    holderSecret,
-    issuerPublicKey,
-    query
-  );
+  // 1. Generate circuit inputs based on verification mode
+  const inputs =
+    mode === 'MODE_B' && smtWitness
+      ? await generateCircuitInputsModeB(
+          credPkg,
+          holderSecret,
+          issuerPublicKey,
+          query,
+          smtWitness,
+        )
+      : await generateCircuitInputs(
+          credPkg,
+          holderSecret,
+          issuerPublicKey,
+          query,
+        );
 
   // 2. Resolve assets
   const assets = overrideAssetPaths
     ? { wasmUrl: overrideAssetPaths.wasm, zkeyUrl: overrideAssetPaths.zkey }
-    : getCircuitAssetPaths();
+    : getCircuitAssetPaths(mode);
 
   // 3. Execute prover
   const { proof, publicSignals, durationMs, workerOffThread } = await runProver(

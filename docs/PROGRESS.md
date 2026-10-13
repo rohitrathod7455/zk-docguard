@@ -393,7 +393,51 @@
 
 ## Phase 9 — Privacy-Preserving Revocation, Gateway, Sharing
 
-**Status:** 🔲 Not started
+**Status:** ✅ Complete
+
+**What was done:**
+
+- **Privacy-Preserving Revocation via In-Circuit Sparse Merkle Trees (Mode B):**
+  - Designed, compiled, and benchmarked `DiscloseModeB.circom` integrating `SMTVerifier(10)` depth (12,933 constraints, fitting comfortably within $2^{14}$ Powers of Tau).
+  - Mode B removes `credentialId` completely from the public signals array, ensuring anonymity and preventing correlation with on-chain registries.
+  - Real Groth16 proving key setup with `disclose_mode_b_final.zkey` and standalone Solidity verifier `Groth16VerifierModeB.sol`.
+  - Input generator (`packages/circuits/src/input-generator.ts`) supporting 10-level non-membership sibling paths with `oldKey`, `oldValue`, and `isOld0`.
+- **On-Chain Verifier Gateway (`packages/contracts/src/VerifierGateway.sol`):**
+  - Unified verification router supporting both Mode A (direct on-chain revocation registry lookup via `verifyAndRecordPresentation`) and Mode B (in-circuit SMT root validation via `verifyModeB`).
+  - Integrated replay protection using `usedChallenges` mapping and issuer registry validation.
+  - Exported artifacts (`VerifierGateway.json`, interfaces, deployment addresses) into `@zk-docguard/core`.
+  - Comprehensive unit test suite (`packages/contracts/test/VerifierGateway.test.ts`) covering Mode A and Mode B flows.
+- **Backend SMT & Ephemeral Sharing Services (`apps/api`):**
+  - `GET /v1/revocations/:issuerKeyHash/witness/:credentialId`: Generates 10-level padded SMT exclusion witnesses directly for active credentials and returns HTTP 409 for revoked credentials.
+  - `POST /v1/revocations`: Issuer-authenticated endpoint for recording revocations and updating Sparse Merkle Tree state.
+  - `POST /v1/sharing/links`: Time-limited, verifier-scoped document access link generation with TTL support.
+  - `POST /v1/sharing/links/:id/fulfill`: Holder re-wraps symmetric document encryption key with verifier's ephemeral X25519 public key.
+  - `POST /v1/sharing/links/:id/access`: Verifier retrieves ephemeral wrapped ciphertext and unwraps key within TTL.
+  - Presentation verification service (`apps/api/src/services/verification.ts`): Mode B verification supporting normalized 32-byte hex signal parsing, SMT root verification against current and historical issuer roots, and issuing anonymous receipts (`credentialId = ANONYMOUS_IN_CIRCUIT_SMT`).
+- **Frontend Prover & Ephemeral Sharing Integration (`apps/web`):**
+  - Verifier request builder (`apps/web/src/app/verifier/page.tsx`): Mode A vs Mode B selection toggle with explanation of privacy guarantees.
+  - Holder wallet presenting flow (`apps/web/src/app/wallet/present/page.tsx`): Automatic detection of Mode B requests, real-time SMT witness retrieval from API, and Groth16 proof generation using `disclose_mode_b_final.zkey`.
+  - Ephemeral sharing UI (`apps/web/src/app/wallet/page.tsx`): Ephemeral link fulfillment dialog with automatic client-side key wrapping.
+- **End-to-End Test Suite (`e2e/test/privacy-revocation-gateway.test.ts`):**
+  - 6 end-to-end tests validating:
+    1. SMT non-membership exclusion witness generation from API.
+    2. Real Groth16 Mode B selective disclosure without exposing `credentialId`.
+    3. Negative test: Revoked credentials fail non-membership witness generation (HTTP 409).
+    4. Tree updates: Unrevoked credentials remain provable after sibling leaf revocations.
+    5. Tampered SMT root rejection.
+    6. Ephemeral document sharing: X25519 key wrapping, fulfillment, unwrap, and TTL expiration rejection.
+- **Verification & Builds:**
+  - 25/25 E2E tests passing 100% across the monorepo.
+  - 10/10 turbo test tasks passing.
+  - 7/7 turbo build tasks passing including Next.js production bundle.
+
+**What is deferred:**
+
+- Comprehensive load testing, penetration audits, and formal benchmark reporting (Phase 10).
+
+**Known issues:**
+
+- None.
 
 ---
 

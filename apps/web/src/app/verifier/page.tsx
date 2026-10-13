@@ -30,6 +30,7 @@ export default function VerifierRequestPage() {
   const [verifierName, setVerifierName] = useState('Apex Verification Services');
   const [domain, setDomain] = useState('apexverification.org');
   const [validityWindow, setValidityWindow] = useState('15');
+  const [verificationMode, setVerificationMode] = useState<'MODE_B' | 'MODE_A'>('MODE_B');
 
   // Selected claims (reveal mask 0..7)
   // 0: holderCommitment (always hidden), 1: schemaId
@@ -157,6 +158,7 @@ export default function VerifierRequestPage() {
       }
 
       const requestPayload = {
+        mode: verificationMode,
         revealMask,
         requiredAttributes,
         requiredPredicates: predicates,
@@ -303,6 +305,23 @@ export default function VerifierRequestPage() {
                 onChange={(e) => setDomain(e.target.value)}
                 helperText="Cryptographically hashed with nonce to prevent cross-verifier replay"
                 required
+              />
+
+              <Select
+                label="Revocation Verification Protocol"
+                value={verificationMode}
+                onChange={(e) => setVerificationMode(e.target.value as 'MODE_B' | 'MODE_A')}
+                options={[
+                  {
+                    value: 'MODE_B',
+                    label: 'Mode B: Privacy-Preserving Sparse Merkle Tree (Zero CredentialId Leakage)',
+                  },
+                  {
+                    value: 'MODE_A',
+                    label: 'Mode A: Direct On-Chain Flag (Legacy Disclosed CredentialId)',
+                  },
+                ]}
+                hint="Mode B verifies non-revocation in-circuit via SMT exclusion, ensuring credentialId is never exposed."
               />
 
               <Select

@@ -13,6 +13,7 @@ import { credentialRoutes } from './routes/credentials.js';
 import { revocationRoutes } from './routes/revocations.js';
 import { sessionRoutes } from './routes/sessions.js';
 import { verifyRoutes } from './routes/verify.js';
+import { sharingRoutes } from './routes/sharing.js';
 import { disconnectPrisma } from './db/client.js';
 import { blockchainIndexer } from './indexer/worker.js';
 
@@ -104,6 +105,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(revocationRoutes);
   await app.register(sessionRoutes);
   await app.register(verifyRoutes);
+  await app.register(sharingRoutes);
 
   return app;
 }

@@ -296,6 +296,61 @@ export const api = {
   },
   revocations: {
     record: recordRevocation,
+    async getWitness(issuerKeyHash: string, credentialId: string) {
+      const res = await fetch(`${API_BASE_URL}/v1/revocations/${issuerKeyHash}/witness/${credentialId}`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Failed to fetch SMT non-membership witness (HTTP ${res.status})`);
+      }
+      return res.json();
+    },
+  },
+  sharing: {
+    async createLink(payload: {
+      cid: string;
+      verifierPublicKey: string;
+      verifierName: string;
+      ttlSeconds?: number;
+    }) {
+      const res = await fetch(`${API_BASE_URL}/v1/sharing/links`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Failed to create share link (HTTP ${res.status})`);
+      }
+      return res.json();
+    },
+    async getLink(id: string) {
+      const res = await fetch(`${API_BASE_URL}/v1/sharing/links/${id}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    },
+    async fulfillLink(id: string, wrappedKey: Record<string, unknown>) {
+      const res = await fetch(`${API_BASE_URL}/v1/sharing/links/${id}/fulfill`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wrappedKey }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Failed to fulfill share link (HTTP ${res.status})`);
+      }
+      return res.json();
+    },
+    async accessLink(id: string) {
+      const res = await fetch(`${API_BASE_URL}/v1/sharing/links/${id}/access`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Failed to access share link (HTTP ${res.status})`);
+      }
+      return res.json();
+    },
   },
   ipfs: {
     upload: uploadCiphertextToIpfs,
@@ -341,6 +396,7 @@ export const api = {
     async submitPresentation(
       id: string,
       presentation: {
+        mode?: 'MODE_A' | 'MODE_B';
         proof: {
           pi_a: string[];
           pi_b: string[][];
@@ -351,6 +407,7 @@ export const api = {
     ) {
       const groth16 = presentation.proof;
       const body = {
+        mode: presentation.mode || 'MODE_A',
         proof: {
           pi_a: groth16.pi_a,
           pi_b: groth16.pi_b,
