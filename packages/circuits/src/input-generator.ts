@@ -38,6 +38,25 @@ export interface CircuitInputs {
   challenge: string;
 }
 
+export interface CircuitInputsModeB extends CircuitInputs {
+  // Mode B SMT non-membership private inputs
+  smtSiblings: string[];
+  smtOldKey: string;
+  smtOldValue: string;
+  smtIsOld0: string;
+
+  // Mode B public input
+  revocationRoot: string;
+}
+
+export interface SMTWitnessInput {
+  root: bigint | string;
+  siblings: (bigint | string)[];
+  oldKey: bigint | string;
+  oldValue: bigint | string;
+  isOld0: boolean;
+}
+
 /**
  * @notice Generates valid Groth16 circuit inputs for the DiscloseModeA circuit
  *         from an issued CredentialPackage and a verifier's presentation query.
@@ -139,3 +158,48 @@ export async function generateCircuitInputs(
     challenge: challengeBI.toString(),
   };
 }
+
+/**
+ * @notice Generates valid Groth16 circuit inputs for the DiscloseModeB circuit
+ *         including SMT non-membership witness and public revocation root.
+ * @param credPkg Issued CredentialPackage containing VC, raw values, and salts.
+ * @param holderSecret Prover's private holder secret (field element).
+ * @param issuerPublicKey BabyJubJub public key { x, y } of the issuer.
+ * @param query Presentation query specifying disclosed attributes and predicates.
+ * @param smtWitness SMT non-membership exclusion witness for credentialId.
+ * @param smtLevels Tree depth (defaults to 10).
+ */
+export async function generateCircuitInputsModeB(
+  credPkg: CredentialPackage,
+  holderSecret: bigint | string,
+  issuerPublicKey: { x: bigint; y: bigint },
+  query: PresentationQuery,
+  smtWitness: SMTWitnessInput,
+  smtLevels = 10,
+): Promise<CircuitInputsModeB> {
+  const baseInputs = await generateCircuitInputs(
+    credPkg,
+    holderSecret,
+    issuerPublicKey,
+    query,
+  );
+
+  const siblings: string[] = [];
+  for (let s = 0; s < smtLevels; s++) {
+    if (s < smtWitness.siblings.length) {
+      siblings.push(BigInt(smtWitness.siblings[s]!).toString());
+    } else {
+      siblings.push('0');
+    }
+  }
+
+  return {
+    ...baseInputs,
+    smtSiblings: siblings,
+    smtOldKey: BigInt(smtWitness.oldKey).toString(),
+    smtOldValue: BigInt(smtWitness.oldValue).toString(),
+    smtIsOld0: smtWitness.isOld0 ? '1' : '0',
+    revocationRoot: BigInt(smtWitness.root).toString(),
+  };
+}
+
