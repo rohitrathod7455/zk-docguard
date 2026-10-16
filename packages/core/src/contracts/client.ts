@@ -12,9 +12,14 @@ export interface DeploymentAddresses {
 
 export const KNOWN_ADDRESSES: Record<number, DeploymentAddresses> = {
   31337: {
-    issuerRegistry: addressesData.hardhat.contracts.IssuerRegistry.address as Address,
-    documentRegistry: addressesData.hardhat.contracts.DocumentRegistry.address as Address,
-    revocationRegistry: addressesData.hardhat.contracts.RevocationRegistry.address as Address,
+    issuerRegistry: (addressesData.hardhat?.contracts?.IssuerRegistry?.address ?? '0x5FbDB2315678afecb367f032d93F642f64180aa3') as Address,
+    documentRegistry: (addressesData.hardhat?.contracts?.DocumentRegistry?.address ?? '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512') as Address,
+    revocationRegistry: (addressesData.hardhat?.contracts?.RevocationRegistry?.address ?? '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0') as Address,
+  },
+  80002: {
+    issuerRegistry: ((addressesData as Record<string, any>).amoy?.contracts?.IssuerRegistry?.address ?? '0x5FbDB2315678afecb367f032d93F642f64180aa3') as Address,
+    documentRegistry: ((addressesData as Record<string, any>).amoy?.contracts?.DocumentRegistry?.address ?? '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512') as Address,
+    revocationRegistry: ((addressesData as Record<string, any>).amoy?.contracts?.RevocationRegistry?.address ?? '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0') as Address,
   },
 };
 
@@ -23,12 +28,23 @@ export const KNOWN_ADDRESSES: Record<number, DeploymentAddresses> = {
  */
 export function getRegistryAddresses(chainId: number): DeploymentAddresses {
   const addresses = KNOWN_ADDRESSES[chainId];
-  if (!addresses) {
-    throw new Error(
-      `No deployment addresses recorded for chain ID ${chainId}. Please provide explicit addresses.`,
-    );
+  if (addresses) return addresses;
+
+  // Search addressesData for dynamic deployments
+  const data = addressesData as Record<string, any>;
+  for (const net of Object.values(data)) {
+    if (net && net.chainId === chainId && net.contracts) {
+      return {
+        issuerRegistry: net.contracts.IssuerRegistry?.address as Address,
+        documentRegistry: net.contracts.DocumentRegistry?.address as Address,
+        revocationRegistry: net.contracts.RevocationRegistry?.address as Address,
+      };
+    }
   }
-  return addresses;
+
+  throw new Error(
+    `No deployment addresses recorded for chain ID ${chainId}. Please provide explicit addresses.`,
+  );
 }
 
 export interface ContractOptions {

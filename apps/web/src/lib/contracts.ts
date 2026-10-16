@@ -9,7 +9,7 @@ import {
   Hex,
   PublicClient,
 } from 'viem';
-import { hardhat } from 'viem/chains';
+import { hardhat, polygonAmoy, sepolia } from 'viem/chains';
 import {
   KNOWN_ADDRESSES,
   IssuerRegistryArtifact,
@@ -17,11 +17,24 @@ import {
   RevocationRegistryArtifact,
 } from '@zk-docguard/core';
 
-export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || 'http://127.0.0.1:8545';
-export const CHAIN_ID = 31337;
+export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 31337);
+
+function resolveDefaultRpcUrl(chainId: number): string {
+  if (chainId === 80002) return 'https://rpc-amoy.polygon.technology';
+  if (chainId === 11155111) return 'https://rpc.sepolia.org';
+  return 'http://127.0.0.1:8545';
+}
+
+function resolveChain(chainId: number) {
+  if (chainId === 80002) return polygonAmoy;
+  if (chainId === 11155111) return sepolia;
+  return hardhat;
+}
+
+export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || resolveDefaultRpcUrl(CHAIN_ID);
 
 export const publicClient: PublicClient = createPublicClient({
-  chain: hardhat,
+  chain: resolveChain(CHAIN_ID),
   transport: http(RPC_URL),
 });
 
@@ -29,11 +42,21 @@ export const CONTRACT_ADDRESSES: {
   issuerRegistry: `0x${string}`;
   documentRegistry: `0x${string}`;
   revocationRegistry: `0x${string}`;
-} = KNOWN_ADDRESSES[CHAIN_ID] || {
-  issuerRegistry: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
-  documentRegistry: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
-  revocationRegistry: '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
+} = {
+  issuerRegistry:
+    (process.env.NEXT_PUBLIC_ISSUER_REGISTRY_ADDRESS as `0x${string}`) ||
+    KNOWN_ADDRESSES[CHAIN_ID]?.issuerRegistry ||
+    '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+  documentRegistry:
+    (process.env.NEXT_PUBLIC_DOCUMENT_REGISTRY_ADDRESS as `0x${string}`) ||
+    KNOWN_ADDRESSES[CHAIN_ID]?.documentRegistry ||
+    '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+  revocationRegistry:
+    (process.env.NEXT_PUBLIC_REVOCATION_REGISTRY_ADDRESS as `0x${string}`) ||
+    KNOWN_ADDRESSES[CHAIN_ID]?.revocationRegistry ||
+    '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
 };
+
 
 /**
  * Checks on-chain if a BabyJubJub key hash is active
