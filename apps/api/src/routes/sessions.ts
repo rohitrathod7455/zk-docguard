@@ -186,7 +186,7 @@ export async function sessionRoutes(app: FastifyInstance): Promise<void> {
       const now = new Date();
       return reply.send({
         total,
-        sessions: sessions.map((s) => {
+        sessions: sessions.map((s: any) => {
           const isExpired = s.status === 'PENDING' && now > s.expiresAt;
           return {
             sessionId: s.id,

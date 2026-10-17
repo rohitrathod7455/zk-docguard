@@ -172,7 +172,7 @@ export async function credentialRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.send({
         total,
-        records: records.map((r) => ({
+        records: records.map((r: any) => ({
           ...r,
           expiry: r.expiry.toString(),
         })),
