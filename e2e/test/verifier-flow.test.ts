@@ -9,6 +9,8 @@ import {
   encryptDocument,
   packEncryptedPayload,
   deriveBabyJubKeyPair,
+  computeIssuerKeyHash,
+  fieldToHex,
   issueUniversityDegreeCredential,
   createHolderIdentity,
   bytesToField253,
@@ -33,7 +35,7 @@ const zkeyPath = path.resolve(monorepoRoot, 'packages/circuits/build/disclose_fi
 describe('E2E Phase 8: Verifier Portal & Public Document Verification Flow', () => {
   let app: Awaited<ReturnType<typeof buildApp>>;
 
-  const issuerAddress = '0x70997970c51812dc3a010c7d01b50e0d17dc79c8';
+  const issuerAddress = '0x15d34aaf54267db7d7c367839aaf71a00a2c6a65';
   const issuerDid = `did:ethr:31337:${issuerAddress}`;
   const registryAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
   const chainId = 31337;
@@ -106,6 +108,25 @@ describe('E2E Phase 8: Verifier Portal & Public Document Verification Flow', () 
       ciphertextCid: uploadedCid,
     });
 
+    // 4.5. Ensure issuer exists in database
+    const keyHash = await computeIssuerKeyHash(issuerKey.publicKey.x, issuerKey.publicKey.y);
+    const issuerKeyHashHex = fieldToHex(keyHash);
+
+    await prisma.issuer.upsert({
+      where: { address: issuerAddress },
+      update: {
+        status: 'Active',
+        zkKeyHash: issuerKeyHashHex,
+      },
+      create: {
+        address: issuerAddress,
+        did: issuerDid,
+        zkKeyHash: issuerKeyHashHex,
+        metadataURI: 'ipfs://bafybeiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        status: 'Active',
+      },
+    });
+
     // 5. Anchor in registry database
     await prisma.credentialRecord.upsert({
       where: { docHash: documentHash },
@@ -138,6 +159,9 @@ describe('E2E Phase 8: Verifier Portal & Public Document Verification Flow', () 
     });
     await prisma.credentialRecord.deleteMany({
       where: { docHash: documentHash },
+    });
+    await prisma.issuer.deleteMany({
+      where: { address: issuerAddress },
     });
     await app.close();
     await disconnectPrisma();

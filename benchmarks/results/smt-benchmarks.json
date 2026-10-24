@@ -1,38 +1,38 @@
 {
-  "timestamp": "2026-10-13T19:28:57.516Z",
+  "timestamp": "2026-10-24T12:12:03.220Z",
   "depthLevels": 10,
   "scalingResults": [
     {
       "leafCount": 1000,
-      "totalBuildTimeMs": 1727.3,
-      "throughputLeavesPerSecond": 579,
-      "averageIncrementalInsertMs": 1.55,
-      "averageNonMembershipProofMs": 0.08,
-      "averageMembershipProofMs": 0.19,
+      "totalBuildTimeMs": 3177,
+      "throughputLeavesPerSecond": 315,
+      "averageIncrementalInsertMs": 4.05,
+      "averageNonMembershipProofMs": 0.35,
+      "averageMembershipProofMs": 0.32,
       "treeRootHex": "0x0e37713dff19d4e481a77d16871717118374a3056a47fc24e7a9bc10d40459e2"
     },
     {
       "leafCount": 10000,
-      "totalBuildTimeMs": 19290.4,
-      "throughputLeavesPerSecond": 518,
-      "averageIncrementalInsertMs": 2.05,
-      "averageNonMembershipProofMs": 0.12,
-      "averageMembershipProofMs": 0.12,
+      "totalBuildTimeMs": 40740.3,
+      "throughputLeavesPerSecond": 245,
+      "averageIncrementalInsertMs": 2.83,
+      "averageNonMembershipProofMs": 0.18,
+      "averageMembershipProofMs": 0.17,
       "treeRootHex": "0x1818d28a6b75206ef315538969face36f74d54a7bad1ac70f985e7a94ad6e792"
     },
     {
       "leafCount": 100000,
-      "totalBuildTimeMs": 216052,
-      "throughputLeavesPerSecond": 463,
-      "averageIncrementalInsertMs": 2.42,
-      "averageNonMembershipProofMs": 0.14,
-      "averageMembershipProofMs": 0.14,
+      "totalBuildTimeMs": 456291,
+      "throughputLeavesPerSecond": 219,
+      "averageIncrementalInsertMs": 3.34,
+      "averageNonMembershipProofMs": 0.21,
+      "averageMembershipProofMs": 0.19,
       "treeRootHex": "0x100kSampledExtrapolatedRootInvariantValidated"
     }
   ],
   "analysis": {
     "logarithmicScalingConfirmed": true,
-    "scalingFactor1kTo10k": 1.5,
+    "scalingFactor1kTo10k": 0.51,
     "scalingFactor10kTo100k": 1.17,
     "recommendedMaxLeavesForSubSecondWitness": 100000
   }

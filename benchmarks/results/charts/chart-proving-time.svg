@@ -22,30 +22,30 @@
   <text x="65" y="105" fill="#8C929D" font-size="11" text-anchor="end">2,400 ms</text>
 
   <!-- Category 1: Desktop Witness -->
-  <rect x="130" y="309.35" width="45" height="30.650000000000002" fill="#0E5A4E" rx="3"/>
-  <rect x="180" y="310.74" width="45" height="29.26" fill="#1F7A4D" rx="3"/>
+  <rect x="130" y="275.78999999999996" width="45" height="64.21000000000001" fill="#0E5A4E" rx="3"/>
+  <rect x="180" y="273.89" width="45" height="66.11000000000001" fill="#1F7A4D" rx="3"/>
   <text x="177" y="365" fill="#D0D5DD" font-size="13" text-anchor="middle">Witness Gen</text>
-  <text x="152" y="299.35" fill="#F6F4EE" font-size="11" text-anchor="middle">306.5ms</text>
-  <text x="202" y="300.74" fill="#F6F4EE" font-size="11" text-anchor="middle">292.6ms</text>
+  <text x="152" y="265.78999999999996" fill="#F6F4EE" font-size="11" text-anchor="middle">642.1ms</text>
+  <text x="202" y="263.89" fill="#F6F4EE" font-size="11" text-anchor="middle">661.1ms</text>
 
   <!-- Category 2: Desktop Prove -->
-  <rect x="300" y="230.54000000000002" width="45" height="109.46" fill="#0E5A4E" rx="3"/>
-  <rect x="350" y="239.12" width="45" height="100.88" fill="#1F7A4D" rx="3"/>
+  <rect x="300" y="110.68000000000004" width="45" height="229.31999999999996" fill="#0E5A4E" rx="3"/>
+  <rect x="350" y="112.03000000000003" width="45" height="227.96999999999997" fill="#1F7A4D" rx="3"/>
   <text x="347" y="365" fill="#D0D5DD" font-size="13" text-anchor="middle">Desktop Prove</text>
-  <text x="322" y="220.54000000000002" fill="#F6F4EE" font-size="11" text-anchor="middle">1094.6ms</text>
-  <text x="372" y="229.12" fill="#F6F4EE" font-size="11" text-anchor="middle">1008.8ms</text>
+  <text x="322" y="100.68000000000004" fill="#F6F4EE" font-size="11" text-anchor="middle">2293.2ms</text>
+  <text x="372" y="102.03000000000003" fill="#F6F4EE" font-size="11" text-anchor="middle">2279.7ms</text>
 
   <!-- Category 3: Mobile Prove (Estimated) -->
-  <rect x="470" y="28.039999999999964" width="45" height="311.96000000000004" fill="#0E5A4E" rx="3"/>
-  <rect x="520" y="52.49000000000001" width="45" height="287.51" fill="#1F7A4D" rx="3"/>
+  <rect x="470" y="-313.56000000000006" width="45" height="653.5600000000001" fill="#0E5A4E" rx="3"/>
+  <rect x="520" y="-309.71000000000004" width="45" height="649.71" fill="#1F7A4D" rx="3"/>
   <text x="517" y="365" fill="#D0D5DD" font-size="13" text-anchor="middle">Mobile Prove</text>
-  <text x="492" y="18.039999999999964" fill="#F6F4EE" font-size="11" text-anchor="middle">3119.6ms</text>
-  <text x="542" y="42.49000000000001" fill="#F6F4EE" font-size="11" text-anchor="middle">2875.1ms</text>
+  <text x="492" y="-323.56000000000006" fill="#F6F4EE" font-size="11" text-anchor="middle">6535.6ms</text>
+  <text x="542" y="-319.71000000000004" fill="#F6F4EE" font-size="11" text-anchor="middle">6497.1ms</text>
 
   <!-- Category 4: Node Verification -->
-  <rect x="640" y="338.63" width="45" height="4" fill="#0E5A4E" rx="3"/>
-  <rect x="690" y="338.39" width="45" height="4" fill="#1F7A4D" rx="3"/>
+  <rect x="640" y="336.65" width="45" height="4" fill="#0E5A4E" rx="3"/>
+  <rect x="690" y="337.78" width="45" height="4" fill="#1F7A4D" rx="3"/>
   <text x="687" y="365" fill="#D0D5DD" font-size="13" text-anchor="middle">API Verify</text>
-  <text x="662" y="328.63" fill="#F6F4EE" font-size="11" text-anchor="middle">13.7ms</text>
-  <text x="712" y="328.39" fill="#F6F4EE" font-size="11" text-anchor="middle">16.1ms</text>
+  <text x="662" y="326.65" fill="#F6F4EE" font-size="11" text-anchor="middle">33.5ms</text>
+  <text x="712" y="327.78" fill="#F6F4EE" font-size="11" text-anchor="middle">22.2ms</text>
 </svg>
