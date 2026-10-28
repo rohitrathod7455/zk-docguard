@@ -17,17 +17,17 @@
 
   <!-- Bars for Non-Membership Proof Latency -->
   <!-- 1k -->
-  <rect x="150" y="-67.49999999999994" width="80" height="367.49999999999994" fill="#0E5A4E" rx="3"/>
+  <rect x="150" y="-120" width="80" height="420" fill="#0E5A4E" rx="3"/>
   <text x="190" y="325" fill="#D0D5DD" font-size="13" text-anchor="middle">1,000 Leaves</text>
-  <text x="190" y="-82.49999999999994" fill="#F6F4EE" font-size="12" font-weight="600" text-anchor="middle">0.35 ms</text>
+  <text x="190" y="-135" fill="#F6F4EE" font-size="12" font-weight="600" text-anchor="middle">0.4 ms</text>
 
   <!-- 10k -->
-  <rect x="360" y="111.00000000000003" width="80" height="188.99999999999997" fill="#0E5A4E" rx="3"/>
+  <rect x="360" y="-193.49999999999994" width="80" height="493.49999999999994" fill="#0E5A4E" rx="3"/>
   <text x="400" y="325" fill="#D0D5DD" font-size="13" text-anchor="middle">10,000 Leaves</text>
-  <text x="400" y="96.00000000000003" fill="#F6F4EE" font-size="12" font-weight="600" text-anchor="middle">0.18 ms</text>
+  <text x="400" y="-208.49999999999994" fill="#F6F4EE" font-size="12" font-weight="600" text-anchor="middle">0.47 ms</text>
 
   <!-- 100k -->
-  <rect x="570" y="79.50000000000003" width="80" height="220.49999999999997" fill="#1F7A4D" rx="3"/>
+  <rect x="570" y="-267" width="80" height="567" fill="#1F7A4D" rx="3"/>
   <text x="610" y="325" fill="#D0D5DD" font-size="13" text-anchor="middle">100,000 Leaves</text>
-  <text x="610" y="64.50000000000003" fill="#F6F4EE" font-size="12" font-weight="600" text-anchor="middle">0.21 ms</text>
+  <text x="610" y="-282" fill="#F6F4EE" font-size="12" font-weight="600" text-anchor="middle">0.54 ms</text>
 </svg>

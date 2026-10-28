@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-24T12:11:15.533Z",
+  "timestamp": "2026-10-24T12:18:46.979Z",
   "hardware": {
     "platform": "win32",
     "arch": "x64",
@@ -18,19 +18,19 @@
         "zkeySizeBytes": 5739969,
         "wasmSizeBytes": 2842334,
         "vkeySizeBytes": 7500,
-        "proofSizeBytes": 721
+        "proofSizeBytes": 724
       },
       "desktopTiming": {
-        "averageWitnessTimeMs": 642.1,
-        "averageProvingTimeMs": 2293.2,
-        "minProvingTimeMs": 1618,
-        "maxProvingTimeMs": 3436,
-        "averageVerificationTimeMs": 33.5,
+        "averageWitnessTimeMs": 355.8,
+        "averageProvingTimeMs": 1270.8,
+        "minProvingTimeMs": 849.6,
+        "maxProvingTimeMs": 2031,
+        "averageVerificationTimeMs": 15.5,
         "iterations": 3
       },
       "mobileEstimatedTiming": {
         "targetDevice": "ARM64 Cortex-A78 / Apple A15 Bionic (V8 WebWorker)",
-        "averageProvingTimeMs": 6535.6,
+        "averageProvingTimeMs": 3621.8,
         "scalingFactor": 2.85
       }
     },
@@ -45,19 +45,19 @@
         "zkeySizeBytes": 7696108,
         "wasmSizeBytes": 3308284,
         "vkeySizeBytes": 7492,
-        "proofSizeBytes": 720
+        "proofSizeBytes": 725
       },
       "desktopTiming": {
-        "averageWitnessTimeMs": 661.1,
-        "averageProvingTimeMs": 2279.7,
-        "minProvingTimeMs": 2212.7,
-        "maxProvingTimeMs": 2366.6,
-        "averageVerificationTimeMs": 22.2,
+        "averageWitnessTimeMs": 272.3,
+        "averageProvingTimeMs": 939,
+        "minProvingTimeMs": 930.6,
+        "maxProvingTimeMs": 943.8,
+        "averageVerificationTimeMs": 13.5,
         "iterations": 3
       },
       "mobileEstimatedTiming": {
         "targetDevice": "ARM64 Cortex-A78 / Apple A15 Bionic (V8 WebWorker)",
-        "averageProvingTimeMs": 6497.1,
+        "averageProvingTimeMs": 2676.2,
         "scalingFactor": 2.85
       }
     }
@@ -65,7 +65,7 @@
   "comparison": {
     "constraintDelta": 3789,
     "constraintPercentageIncrease": 41.4,
-    "provingTimeDeltaMs": -13.5,
-    "provingTimePercentageIncrease": -0.6
+    "provingTimeDeltaMs": -331.8,
+    "provingTimePercentageIncrease": -26.1
   }
 }
