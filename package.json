@@ -10,7 +10,9 @@
     "node": ">=20.0.0 <23.0.0"
   },
   "scripts": {
+    "turbo": "turbo",
     "build": "turbo run build",
+    "build:api": "turbo run build --filter=@zk-docguard/api",
     "dev": "turbo run dev",
     "demo": "tsx scripts/demo.ts",
     "seed": "tsx apps/api/scripts/seed.ts",
@@ -21,15 +23,17 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css,yml,yaml}\"",
     "clean": "turbo run clean && rimraf node_modules"
   },
+  "dependencies": {
+    "tsx": "^4.19.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.6.3"
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
     "eslint": "^9.15.0",
     "prettier": "^3.3.3",
-    "rimraf": "^6.0.1",
-    "tsx": "^4.19.2",
-    "turbo": "^2.3.3",
-    "typescript": "^5.6.3"
+    "rimraf": "^6.0.1"
   }
 }
